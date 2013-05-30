@@ -10,4 +10,4 @@ $(EXECUTABLE): $(OBJECTS)
 myTest.o: ntcan.h
 
 clean:
-	rm -f $(EXECUTABLE) $(OBJECTS)
+	rm -f $(EXECUTABLE)

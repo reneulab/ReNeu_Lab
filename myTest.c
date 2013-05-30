@@ -59,7 +59,7 @@ int32_t errorCheck( int32_t command,
                    NTCAN_RESULT result) {
 
    int32_t ret_val = 0xFF;
-  
+   printf("result: %d\n",result);  
    switch(result) {
       case NTCAN_SUCCESS:
          ret_val = 0; break;
@@ -71,7 +71,7 @@ int32_t errorCheck( int32_t command,
 	   ret_val = 1; break;
       default: 
          if(command == CAN_OPEN) {
-	    switch(result)
+           switch(result) {
 	       case NTCAN_INVALID_DRIVER:
  	          printf("Error, invalid driver\n");
                   ret_val = 1; break; 
@@ -86,9 +86,11 @@ int32_t errorCheck( int32_t command,
     		  ret_val = 1; break;
                case NTCAN_INSUFFICIENT_RESOURCES:
 		  printf("Error, decrease handle queue\n"); 
-                  ret_val = 1; break;  
-	 }
-
+                  ret_val = 1; break;
+               default:
+                  printf("Error unknown, result = %d\n", result);
+                  ret_val = 1; break; }
+         } 
          else if(command == CAN_ID_ADD) {
 	    switch(result) {
 	       case NTCAN_ID_ALREADY_ENABLED:
@@ -224,14 +226,15 @@ NTCAN* initNTCAN(uint32_t baud,  uint32_t flags,
 {
    NTCAN		*myNTCAN;  // Pointer to NTCAN device
    NTCAN_HANDLE		handle;    // 
-   int32_t 		result;    // Used for checking for error
+   NTCAN_RESULT       	result=0xFF;    // Used for checking for error
    int32_t		i;         // Index for multiple objects
    int32_t		timeout=0;   // Current number of timeouts
 /* Open can */  
    result = canOpen(net,flags,txSize,rxSize,   // Opens device
                     txTime,rxTime,&handle);
-   if(errorCheck(CAN_OPEN,result) != 0);  // Error check
-      { return NULL; } // returns NULL if error
+   if(errorCheck(CAN_OPEN,result) != 0)// Error check
+      { printf("Error in canOpen()\n");
+        return NULL; } // returns NULL if error
    printf("canOpen() success\n");
 /* Setting baudrate */   
    result = canSetBaudrate(handle,baud);   // sets baudrate
@@ -408,13 +411,13 @@ int32_t writeNTCAN(NTCAN *myNTCAN, int32_t i)
 int32_t main(void) {
    NTCAN	 *myNT;
    int32_t	result;
-   int32_t      ID[1] = {1}; 
+   int32_t      ID[1] = {0x601}; 
 /* Open can */
    myNT = initNTCAN(NTCAN_AUTOBAUD,  NTCAN_MODE_NO_INTERACTION,
 		 ID, 0, NTCAN_MAX_RX_QUEUESIZE,1000,
 		 NTCAN_MAX_TX_QUEUESIZE, 1000);
    if(myNT == NULL) {
-   printf("Error in open\n");
+   printf("Error in open, myNT: %d\n", myNT);
    return 1; }
 /* close Can */
    result = closeNTCAN(myNT);
