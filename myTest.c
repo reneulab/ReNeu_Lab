@@ -35,10 +35,6 @@
 typedef struct
 {
 	uint32_t 	baud;   // baudrate of device
-        int32_t		txIndex;// Index of first tx ojects
-        int32_t		txLen;  // number of tx ojects
-        int32_t		rxIndex; // Index of first rx ojects 
-        int32_t		rxLen;   // number of rx objects
 	NTCAN_HANDLE	handle; // Handle for NTCAN device
         int32_t		ID[CMSG_SIZE];   // array of ID values
 	int32_t		rxTime; // Timeout time in ms for rx
@@ -217,18 +213,14 @@ int32_t errorCheck( int32_t command,
 /*   Creates NTCAN struct with CMSG_SIZE IDs and objects 	*/
 /*   In: baudrate, mode flags, pointer to array of desired IDs  */
 /*       net number, rx buffer size,rx timeout in ms,   	*/
-/*       tx buffer size, tx timeout in ms, index for where	*/
-/*       messages to be written/read start(first element 0),	*/
-/*       max length of message to be read/written		*/
+/*       tx buffer size, tx timeout in ms			*/
 /*   Out: NUll pointer if error					*/
 /*	  Pointer to NTCAN struct if successful			*/
 /****************************************************************/
 NTCAN* initNTCAN(uint32_t baud,  uint32_t flags,
 		 int32_t ID[],    int32_t net,
 		 int32_t rxSize, int32_t rxTime,
-		 int32_t txSize, int32_t txTime,
-                 int32_t txIndex, int32_t txLen,
-                 int32_t rxIndex, int32_t rxLen)
+		 int32_t txSize, int32_t txTime)
 {
    NTCAN		*myNTCAN;  // Pointer to NTCAN device
    NTCAN_HANDLE		handle;    // 
@@ -267,10 +259,7 @@ NTCAN* initNTCAN(uint32_t baud,  uint32_t flags,
    myNTCAN->baud = baud;     // Putting data into NTCAN Device Struct
    myNTCAN->handle = handle;
    myNTCAN->rxTime = rxTime;
-   myNTCAN->txIndex = txIndex;
-   myNTCAN->txLen = txLen;
-   myNTCAN->rxIndex = rxIndex;
-   myNTCAN->rxLen = rxLen;
+   myNTCAN->txTime = txTime;
 /* Creating CMSG_SIZE number of objects for NTCAN device */
    for(i=0; i<CMSG_SIZE; i++) {
       myNTCAN->ID[i] = ID[i]; // adding IDs to struct 
@@ -352,18 +341,17 @@ int32_t closeNTCAN(NTCAN *myNTCAN)
 /*   Reads values from a NTCAN devices and stores data in 	*/
 /*   NTCAN->obj->struct	 read object rIndex to rIndex+rLen-1    */
 /*      In:  Pointer to NTCAN device				*/
+/*           j is index of object in NTCAN device (0 is first   */
 /*      Out: 0 if successfull, 1 if error			*/
 /* Warning: make sure you set rIndex and rLen to desired	*/
 /****************************************************************/
-int32_t readNTCAN(NTCAN *myNTCAN)
+int32_t readNTCAN(NTCAN *myNTCAN, int32_t j)
  {
    NTCAN_RESULT 	result;
-   int32_t		i,j;
+   int32_t		i;
    int32_t 		timeout;
    int32_t 		len;  
-/* Iterates through all read objects of NTCAN device */
-   for(j=myNTCAN->rxIndex;j<(myNTCAN->rxLen + myNTCAN->rxIndex);j++) 
-   { 
+/* Iterates through all read objects of NTCAN device */ 
    len = myNTCAN->obj[j]->len; 
 /* Reading Object of NTCAN device */  
       do { result = canRead(myNTCAN->handle,myNTCAN->obj[j],
@@ -387,8 +375,7 @@ int32_t readNTCAN(NTCAN *myNTCAN)
       for(i=0;i<(myNTCAN->obj[j]->len & 0x0F);i++) {
          printf("Byte %d of recieved message: %d\n", i, 
                  myNTCAN->obj[j]->data[i]);
-      }
-   } 
+      } 
    return 0; 
  }
 
@@ -396,29 +383,25 @@ int32_t readNTCAN(NTCAN *myNTCAN)
 /*                    Function: writeNTCAN			*/
 /*     writes values in NTCAN->obj->data to NTCAN device	*/
 /*            In: pointer to NTCAN device 			*/
+/*                i is index of object to write to (0 is first) */
 /*            Out: 0 if successfull, 1 if error			*/
 /* Warning: Set txIndex and txLen to ojects you want to write to*/	
 /****************************************************************/
-int32_t writeNTCAN(NTCAN *myNTCAN) 
+int32_t writeNTCAN(NTCAN *myNTCAN, int32_t i) 
 {
    NTCAN_RESULT		result;
-   int32_t 		i;
    int32_t		len;
-/* Iterates through all objecs specified by txIndex and txLen */
-   for(i=myNTCAN->txIndex;i<(myNTCAN->txLen + myNTCAN->txIndex);i++)
-   {
-     len = myNTCAN->obj[i]->len;
+   len = myNTCAN->obj[i]->len;
 /* Writes to NTCAN device */
-      myNTCAN->obj[i]->len |= myNTCAN->obj[i]->len + (RTR_ENABLE<<4);
-      result = canWrite(myNTCAN->handle,myNTCAN->obj[i],
+   myNTCAN->obj[i]->len |= myNTCAN->obj[i]->len + (RTR_ENABLE<<4);
+   result = canWrite(myNTCAN->handle,myNTCAN->obj[i],
                         &len, NULL); 
-      if(errorCheck(CAN_WRITE,result) != 0)
-         { return 1; }
-      myNTCAN->obj[i]->len = len; 
-      printf("Message sent %d successful frames\n",
+   if(errorCheck(CAN_WRITE,result) != 0)
+      { return 1; }
+   myNTCAN->obj[i]->len = len; 
+   printf("Message sent %d successful frames\n",
               myNTCAN->obj[i]->len);
-      return 0;
-   } 
+   return 0; 
 }
 
 
@@ -429,9 +412,9 @@ int32_t main(void) {
 /* Open can */
    myNT = initNTCAN(NTCAN_AUTOBAUD,  NTCAN_MODE_NO_INTERACTION,
 		 ID, 0, NTCAN_MAX_RX_QUEUESIZE,1000,
-		 NTCAN_MAX_TX_QUEUESIZE, 1000, 0,1,0,1);
+		 NTCAN_MAX_TX_QUEUESIZE, 1000);
    if(myNT == NULL) {
-   printf("Error in open");
+   printf("Error in open\n");
    return 1; }
 /* close Can */
    result = closeNTCAN(myNT);
