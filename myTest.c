@@ -204,7 +204,7 @@ int32_t errorCheck( int32_t command,
             switch(result) {
 	       case NTCAN_RX_TIMEOUT:
 	          printf("Error, RX timeout\n");
-		  return 1; break; }
+		  return 2; break; }
          }
          
    }
@@ -349,7 +349,8 @@ int32_t readNTCAN(NTCAN *myNTCAN, int32_t j)
    int32_t 		timeout;
    int32_t 		len;  
 /* Iterates through all read objects of NTCAN device */ 
-   len = myNTCAN->obj[j]->len; 
+   len = myNTCAN->obj[j]->len;
+   printf("Len: %d\n", len); 
 /* Reading Object of NTCAN device */  
       do { result = canRead(myNTCAN->handle,myNTCAN->obj[j],
                          &len, NULL); 
@@ -364,12 +365,12 @@ int32_t readNTCAN(NTCAN *myNTCAN, int32_t j)
             return 2; }
       } while(errorCheck(CAN_READ,result) == 2); 
       if(errorCheck(CAN_READ,result) != 0)
-         { return 1; }  // error check
+         { printf("Here\n"); return 1; }  // error check
 /* Printing read object of NTCAN device to screen */
       printf("readNTCAN() successfull\n") ;
       printf("ID of NTCAN device: %d\n", myNTCAN->obj[j]->id);
       printf("Length of message recieved: %d\n", (len & 0x0F) );
-      for(i=0;i<(myNTCAN->obj[j]->len & 0x0F);i++) {
+      for(i=0;i<(len & 0x0F);i++) {
          printf("Byte %d of recieved message: %d\n", i, 
                  myNTCAN->obj[j]->data[i]);
       } 
@@ -408,15 +409,17 @@ int32_t main(void) {
    int32_t      ID[1] = {0x601}; 
 /* Open can */
    myNT = initNTCAN(NTCAN_AUTOBAUD,  NTCAN_MODE_NO_INTERACTION,
-		 ID, 0, NTCAN_MAX_RX_QUEUESIZE,1000,
-		 NTCAN_MAX_TX_QUEUESIZE, 1000);
+		 ID, 0, NTCAN_MAX_RX_QUEUESIZE,10000,
+		 NTCAN_MAX_TX_QUEUESIZE, 10000);
    if(myNT == NULL) {
       printf("Error in open\n");
       return 1;}
+    myNT->obj[0]->len = 8; 
 /* read can */
    result = readNTCAN(myNT,0);
    if(result != 0) {
       printf("Error in read\n"); 
+      closeNTCAN(myNT); 
       return 1; }
 /* close Can */
    result = closeNTCAN(myNT);
