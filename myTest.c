@@ -36,10 +36,9 @@ typedef struct
 {
 	uint32_t 	baud;   // baudrate of device
 	NTCAN_HANDLE	handle; // Handle for NTCAN device
-        int32_t		ID[CMSG_SIZE];   // array of ID values
 	int32_t		rxTime; // Timeout time in ms for rx
 	int32_t		txTime; // Timeout time in ms for tx
-	CMSG		*obj[CMSG_SIZE]; // pointer to array of CMSG 
+	CMSG		obj[CMSG_SIZE]; // pointer to array of CMSG 
 } NTCAN;                                 // structs
 
 
@@ -58,115 +57,114 @@ typedef struct
 int32_t errorCheck( int32_t command,
                    NTCAN_RESULT result) {
 
-   int32_t ret_val = 0xFF;
-   printf("result: %d\n",result);  
+   printf("command: %d,result: %d\n",command,result);
    switch(result) {
-      case NTCAN_SUCCESS:
-         ret_val = 0; break;
+      case NTCAN_SUCCESS: 
+         return 0; break;
       case NTCAN_INVALID_PARAMETER:  
-         printf("Error, passed invalid paramveter\n");
-	 ret_val = 1; break; 
+         printf("Error, passed invalid parameter\n");
+	 return 1; break; 
       case NTCAN_WRONG_DEVICE_STATE:
 	   printf("Error, system is in sleep mode\n"); 
-	   ret_val = 1; break;
+	   return 1; break;
       default: 
          if(command == CAN_OPEN) {
-           switch(result) {
+	    switch(result)
 	       case NTCAN_INVALID_DRIVER:
  	          printf("Error, invalid driver\n");
-                  ret_val = 1; break; 
+                  return 1; break; 
 	       case NTCAN_INVALID_FIRMWARE:
                   printf("Error, invalid firmware\n");
-	          ret_val = 1; break;      	  
+	          return 1; break;      	  
                case NTCAN_INVALID_HARDWARE:
                   printf("Error, incompatiable driver\n");
-                  ret_val = 1; break;
+                   return 1; break;
 	       case NTCAN_NET_NOT_FOUND:
 		  printf("Error, no net found\n");
-    		  ret_val = 1; break;
+    		  return 1; break;
                case NTCAN_INSUFFICIENT_RESOURCES:
 		  printf("Error, decrease handle queue\n"); 
-                  ret_val = 1; break;
-               default:
-                  printf("Error unknown, result = %d\n", result);
-                  ret_val = 1; break; }
-         } 
+                  return 1; break;  
+	 }
+
          else if(command == CAN_ID_ADD) {
 	    switch(result) {
 	       case NTCAN_ID_ALREADY_ENABLED:
 		  printf("Error, ID already enabled\n");
-		  ret_val = 1; break;             
+		  return 1; break;             
                case NTCAN_INSUFFICIENT_RESOURCES:
 		  printf("Error, ID active with other handles\n"); 
-                  ret_val = 1; break; }
+                  return 1; break; }
          }
   	 else if(command == CAN_ID_DELETE) {
     	    switch(result) {
       	       case NTCAN_ID_NOT_ENABLED:
 		  printf("Error, ID not enabled\n");
-		  ret_val = 1; break; }
+		  return 1; break; }
          }
 
  	 else if(command == CAN_IO_CTL) {
  	    switch(result) {
 	       case NTCAN_NOT_IMPLEMENTED:
 	          printf("Error, ulCommand error\n"); 
-	          ret_val = 1; break; }
+	          return 1; break; }
 	 }
 
 	 else if(command == CAN_WRITE) {
 	    switch(result) {
 	       case NTCAN_TX_ERROR:
 		  printf("TX Error\n"); 
-	          ret_val = 1; break; 
+	          return 1; break; 
 	       case NTCAN_TX_TIMEOUT:
 		  printf("Error, TX timeout\n"); 
-                  ret_val = 1; break; }
+                  return 1; break; }
 	 }
          if((command == CAN_WRITE) || (command == CAN_WRITE_T)) {
 	    switch(result) {
 	       case NTCAN_CONTR_ERR_PASSIVE:
 		  printf("Error, REC or TEC value > 128\n");
-                  ret_val = 2; break;
+                  return 2; break;
 	       case NTCAN_CONTR_OFF_BUS:
 		  printf("Transmission Error\n"); 
-		  ret_val = 2; break; 
+		  return 2; break; 
 	       case NTCAN_CONTR_WARN:
                   printf("Reception Error\n"); 
-		  ret_val = 2; break;
+		  return 2; break;
 	       case NTCAN_ERROR_NO_BAUDRATE:
 		  printf("Error, baudrate is not set\n");
-                  ret_val = 1; break; 
+                  return 1; break; 
 	       case NTCAN_ERROR_LOM:
 		  printf("Error, CAN is listen only mode\n");
-                  ret_val = 1; } 
+                  return 1; } 
 		  break;
          }
-         if( (command == CAN_SEND) || (command == CAN_SEND_EVENT) ||
-             (command == CAN_ID_ADD) || (command == CAN_ID_DELETE)) {
+         if( (command == CAN_SEND) || 
+             (command == CAN_SEND_EVENT) ||
+             (command == CAN_ID_ADD) || 
+             (command == CAN_ID_DELETE)) {
             switch(result) {
 	       case NTCAN_CONTR_BUSY: 
 		  printf("Error, FIFO is full\n");
-		  ret_val = 2; break; } 
+		  return 2; break; } 
          }
          if( (command == CAN_WRITE) || (command == CAN_WRITE_T) ||
             (command == CAN_READ) || (command == CAN_READ_T) ) {
             switch(result) {
 	       case NTCAN_HANDLE_FORCED_CLOSE:
 	   	  printf("Error, CAN was closed in another thread\n"); 
-                  ret_val = 1; break;
+                  return 1; break;
             /* case NTCAN_IO_PENDING:
 		  printf("Error, operation not terminated\n"
                   ret_val = 1; break;    only for windows */
                case NTCAN_OPERATION_ABORTED:
 		  printf("Error, operation aborted\n");
-		  ret_val = 1; break; }
+		  return 1; break; }
          }
          if( command != CAN_OPEN) {
             switch(result) {
                case NTCAN_INVALID_HANDLE:
 		  printf("Error, invalid hadnle"); 
-		  ret_val = 1; break; }
+		  return 1; break; }
          }
       /* if( (command == CAN_GET_OVERLAPPED_RESULT) || 
              (command == CAN_GET_OVERLAPPED_RESULT_T)) {
@@ -180,34 +178,38 @@ int32_t errorCheck( int32_t command,
             switch(result) { 
                case NTCAN_ID_NOT_ENABLED:
 		  printf("Error, ID not enabled\n");
-                  ret_val = 1; break;   
+                  return 1; break;   
                case NTCAN_PENDING_READ:
   		  printf("Error, handle in use in about thread\n");
-                  ret_val = 1; break; }
+                  return 1; break; }
          }
-         if( (command == CAN_IO_CTL) || (command == CAN_SET_BAUDRATE) ||
-             (command == CAN_ID_ADD) || (command == CAN_ID_DELETE)) {
+         if( (command == CAN_IO_CTL) ||
+             (command == CAN_SET_BAUDRATE) ||
+             (command == CAN_ID_ADD) ||
+             (command == CAN_ID_DELETE)) {
             switch(result) {
 	       case NTCAN_NOT_SUPPORTED:
 		  printf("Error CAN not supported\n");
-                  ret_val = 1; break; }
+                  return 1; break; }
          }
          if( (command == CAN_SEND) || (command == CAN_SEND_EVENT) ||
              (command == CAN_WRITE)) {
             switch(result) {
 	       case NTCAN_PENDING_WRITE:
                   printf("Error, pending write\n");
-                  ret_val = 1; break; }
+                  return 1; break; }
          }
          if( (command == CAN_READ) || (command == CAN_READ_T) ||
              (command == CAN_READ_EVENT)) {
             switch(result) {
 	       case NTCAN_RX_TIMEOUT:
 	          printf("Error, RX timeout\n");
-		  ret_val = 1; break; }
-         }   
+		  return 1; break; }
+         }
+         
    }
-   return ret_val; 
+   printf("Unknown Error"); 
+   return 1; 
 }
 
 /****************************************************************/
@@ -226,15 +228,14 @@ NTCAN* initNTCAN(uint32_t baud,  uint32_t flags,
 {
    NTCAN		*myNTCAN;  // Pointer to NTCAN device
    NTCAN_HANDLE		handle;    // 
-   NTCAN_RESULT       	result=0xFF;    // Used for checking for error
+   NTCAN_RESULT		result;    // Used for checking for error
    int32_t		i;         // Index for multiple objects
    int32_t		timeout=0;   // Current number of timeouts
 /* Open can */  
    result = canOpen(net,flags,txSize,rxSize,   // Opens device
                     txTime,rxTime,&handle);
-   if(errorCheck(CAN_OPEN,result) != 0)// Error check
-      { printf("Error in canOpen()\n");
-        return NULL; } // returns NULL if error
+   if(errorCheck(CAN_OPEN,result) != 0)  // Error check
+      { return NULL; } // returns NULL if error
    printf("canOpen() success\n");
 /* Setting baudrate */   
    result = canSetBaudrate(handle,baud);   // sets baudrate
@@ -242,9 +243,30 @@ NTCAN* initNTCAN(uint32_t baud,  uint32_t flags,
       { return NULL; } // returns NULL if error
    result = canGetBaudrate(handle,&baud);  // Reads buadrate
    printf("canSetBaudrate() success. Baudrate is %d\n",baud);
+
+/* Making NTCAN Device */
+   myNTCAN =  malloc(sizeof(NTCAN)); // allocation space for device
+   if(myNTCAN == NULL){   // memory check
+      printf("Error, not enough memory\n");
+      return NULL; }
+   myNTCAN->baud = baud;     
+   myNTCAN->handle = handle;
+   myNTCAN->rxTime = rxTime;
+   myNTCAN->txTime = txTime;
+/* Creating CMSG_SIZE number of objects for NTCAN device */
+   for(i=0; i<CMSG_SIZE; i++) {
+      myNTCAN->obj[i] = malloc(sizeof(CMSG)); // allocating space 
+      if(myNTCAN->obj[i] == NULL){  // memeory check
+         printf("Not enough memory for object %d\n",i); 
+         return NULL; }
+      myNTCAN->obj[i].id = ID[i]; 
+      result = canIoctl(myNTCAN->handle, NTCAN_IOCTL_TX_OBJ_CREATE,
+	                myNTCAN->obj[i]); // creating CMSG_SIZE
+      if(errorCheck(CAN_IO_CTL,result) != 0)  // objects
+         { return NULL; }  // error check 
 /* Adding an ID */
-   for(i=0;i<CMSG_SIZE;i++) {  //  sets up CMSG_SIZE number of IDs
-      do  { result = canIdAdd(handle,ID[i]); // repeat if Timeout error
+      do  { result = canIdAdd(handle,myNTCAN->obj[i].id);
+            // repeat if Timeout 
             timeout++;
             if(timeout>MAX_TIMEOUT) {
                printf("Max timeout out reached, Aborting addID\n");
@@ -252,28 +274,7 @@ NTCAN* initNTCAN(uint32_t baud,  uint32_t flags,
           } while( errorCheck(CAN_ID_ADD,result) == 2); 
       if(errorCheck(CAN_ID_ADD,result) != 0) // error check
          { return NULL; }
-   } 
    printf("canIdAdd() successful\n"); 
-/* Making NTCAN Device */
-   myNTCAN = malloc(sizeof(NTCAN)); // allocation space for device
-   if(myNTCAN == NULL){   // memory check
-      printf("Error, not enough memory\n");
-      return NULL; }
-   myNTCAN->baud = baud;     // Putting data into NTCAN Device Struct
-   myNTCAN->handle = handle;
-   myNTCAN->rxTime = rxTime;
-   myNTCAN->txTime = txTime;
-/* Creating CMSG_SIZE number of objects for NTCAN device */
-   for(i=0; i<CMSG_SIZE; i++) {
-      myNTCAN->ID[i] = ID[i]; // adding IDs to struct 
-      myNTCAN->obj[i] = malloc(sizeof(CMSG)); // allocating space 
-      if(myNTCAN->obj[i] == NULL){  // memeory check
-         printf("Not enough memory for object %d\n",i); 
-         return NULL; }
-      result = canIoctl(myNTCAN->handle, NTCAN_IOCTL_TX_OBJ_CREATE,
-	                myNTCAN->obj[i]); // creating CMSG_SIZE
-      if(errorCheck(CAN_IO_CTL,result) != 0)  // objects
-         { return NULL; }  // error check
    }
    printf("Initializing sucessfull\n");
 /* Flushing FIFO buffer */
@@ -287,37 +288,40 @@ NTCAN* initNTCAN(uint32_t baud,  uint32_t flags,
 /****************************************************************/
 /*		Function: closeNTCAN				*/
 /*   Frees memory used by a NTCAN devices, IDs and its objects	*/
-/*   and closes the NTCAN device				*/	
+/*   and closes the NTCAN device				*/
 /*       In: pointer to a NTCAN device				*/
 /*       Out: 0 is successful, 1 if error			*/
 /*   Warning: Device can not be used after this function 	*/
 /*	      unless reinitialized				*/
 /****************************************************************/
-int32_t closeNTCAN(NTCAN *myNTCAN)
+int32_t closeNTCAN(NTCAN * myNTCAN)
 {
    NTCAN_HANDLE		tempHandle; 
    int32_t		*tempID;
    NTCAN_RESULT		result;
    int32_t 		timeout = 0;
    int32_t		i;
+   CMSG                 *ptr;
 
+   tempHandle = myNTCAN->handle;
    for(i=0;i<CMSG_SIZE;i++); // iterates through all ojects and IDs
    {
+      printf("ID:%d\n",myNTCAN->obj[i].id); 
 /* Flushing system */  
-      result = canIoctl(myNTCAN->handle, 
+      result = canIoctl(tempHandle, 
                         NTCAN_IOCTL_FLUSH_RX_FIFO,NULL);   
       if(errorCheck(CAN_IO_CTL,result) != 0) // error check 
          { return 1; }
+      printf("System Flushed\n");
 /* Deleting NTCAN object */   
-      result = canIoctl(myNTCAN->handle, NTCAN_IOCTL_TX_OBJ_DESTROY,
-                        &(myNTCAN->ID[i]));  // destroys object
+      result = canIoctl(tempHandle, NTCAN_IOCTL_TX_OBJ_DESTROY,
+                        &(myNTCAN->obj[i].id));// destroys object
       if(errorCheck(CAN_IO_CTL,result) != 0) // error check
          { return 1; }  
-      printf("Deleted NTCAN object\n");
+      printf("Deleted NTCAN object\n");  
 /* Deleting ID */
-      tempID= &(myNTCAN->ID[i]);
       // Deletes all ids and retrys if timeout error       
-      do  { result = canIdDelete(myNTCAN->handle,myNTCAN->ID[i]); 
+      do  { result = canIdDelete(tempHandle,myNTCAN->obj[i].id); 
             timeout++;
             if(timeout>MAX_TIMEOUT) {   // checks for max timeout
                printf("Max timeout reached, aborting\n");
@@ -328,9 +332,7 @@ int32_t closeNTCAN(NTCAN *myNTCAN)
       printf("Deleted NTCAN ID\n");
 /* Deallocating memory from myNTCAN and myNTCAN->obj */
       free(myNTCAN->obj[i]); // free's all objects memory
-      free(tempID);          // free's ID memory
    }
-   tempHandle = myNTCAN->handle;
    free(myNTCAN); // free NTCAN device memory
 /* Closing NTCAN device */
    result = canClose(tempHandle);  // closes device 
@@ -355,7 +357,7 @@ int32_t readNTCAN(NTCAN *myNTCAN, int32_t j)
    int32_t 		timeout;
    int32_t 		len;  
 /* Iterates through all read objects of NTCAN device */ 
-   len = myNTCAN->obj[j]->len; 
+   len = myNTCAN->obj[j].len; 
 /* Reading Object of NTCAN device */  
       do { result = canRead(myNTCAN->handle,myNTCAN->obj[j],
                          &len, NULL); 
@@ -373,11 +375,11 @@ int32_t readNTCAN(NTCAN *myNTCAN, int32_t j)
          { return 1; }  // error check
 /* Printing read object of NTCAN device to screen */
       printf("readNTCAN() successfull\n") ;
-      printf("ID of NTCAN device: %d\n", myNTCAN->obj[j]->id);
+      printf("ID of NTCAN device: %d\n", myNTCAN->obj[j].id);
       printf("Length of message recieved: %d\n", (len & 0x0F) );
-      for(i=0;i<(myNTCAN->obj[j]->len & 0x0F);i++) {
+      for(i=0;i<(myNTCAN->obj[j].len & 0x0F);i++) {
          printf("Byte %d of recieved message: %d\n", i, 
-                 myNTCAN->obj[j]->data[i]);
+                 myNTCAN->obj[j].data[i]);
       } 
    return 0; 
  }
@@ -396,14 +398,14 @@ int32_t writeNTCAN(NTCAN *myNTCAN, int32_t i)
    int32_t		len;
    len = myNTCAN->obj[i]->len;
 /* Writes to NTCAN device */
-   myNTCAN->obj[i]->len |= myNTCAN->obj[i]->len + (RTR_ENABLE<<4);
+   myNTCAN->obj[i].len |= myNTCAN->obj[i].len + (RTR_ENABLE<<4);
    result = canWrite(myNTCAN->handle,myNTCAN->obj[i],
                         &len, NULL); 
    if(errorCheck(CAN_WRITE,result) != 0)
       { return 1; }
-   myNTCAN->obj[i]->len = len; 
+   myNTCAN->obj[i].len = len; 
    printf("Message sent %d successful frames\n",
-              myNTCAN->obj[i]->len);
+              myNTCAN->obj[i].len);
    return 0; 
 }
 
@@ -417,7 +419,7 @@ int32_t main(void) {
 		 ID, 0, NTCAN_MAX_RX_QUEUESIZE,1000,
 		 NTCAN_MAX_TX_QUEUESIZE, 1000);
    if(myNT == NULL) {
-   printf("Error in open, myNT: %d\n", myNT);
+   printf("Error in open\n");
    return 1; }
 /* close Can */
    result = closeNTCAN(myNT);
