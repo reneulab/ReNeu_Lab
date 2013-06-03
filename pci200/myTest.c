@@ -340,7 +340,6 @@ int32_t closeNTCAN(NTCAN *myNTCAN)
 /*      In:  Pointer to NTCAN device				*/
 /*           j is index of object in NTCAN device (0 is first   */
 /*      Out: 0 if successfull, 1 if error			*/
-/* Warning: make sure you set rIndex and rLen to desired	*/
 /****************************************************************/
 int32_t readNTCAN(NTCAN *myNTCAN, int32_t j)
  {
@@ -383,7 +382,6 @@ int32_t readNTCAN(NTCAN *myNTCAN, int32_t j)
 /*            In: pointer to NTCAN device 			*/
 /*                i is index of object to write to (0 is first) */
 /*            Out: 0 if successfull, 1 if error			*/
-/* Warning: Set txIndex and txLen to ojects you want to write to*/	
 /****************************************************************/
 int32_t writeNTCAN(NTCAN *myNTCAN, int32_t i) 
 {
