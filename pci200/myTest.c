@@ -1,4 +1,5 @@
 /* Test code for simple communication with PCI200 */
+/*************************************************/
 
 #include "ntcan.h"
 #include <stdio.h>
