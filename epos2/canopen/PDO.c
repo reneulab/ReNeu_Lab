@@ -4,18 +4,19 @@
 #include <string.h>
 
 
-int PDO_send(int fp, uint16_t pdo_id, uint8_t length, Socketcan_t data[]) {
+int32_t PDO_send(NTCAN_HANDLE handle, uint16_t pdo_id, uint8_t length, Socketcan_t data[]) {
 	//uint16_t cob = 0x200 + id;
-	return socketcan_write(fp, pdo_id, length, data);
+	return socketcan_write(handle, pdo_id, length, data);
 }
 
 
-int PDO_read(int fp, my_can_frame* pdo, int timeout) {
+int32_t PDO_read(NTCAN_HANDLE handle, my_can_frame* pdo, 
+                 int32_t timeout) {
 	// Don't touch callers struct unless we have to
-	int err, func;
+	int32_t err, func;
 	my_can_frame f;
 
-	err = socketcan_read(fp, &f, timeout);
+	err = socketcan_read(handle, &f, timeout);
 	if(err != 0) {
 		// Read error, or no data
 		return err;

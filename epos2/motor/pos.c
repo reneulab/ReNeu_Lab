@@ -19,8 +19,8 @@ void _pos_goto(int32_t pos_l, int32_t pos_r) {
 		{2, Switch_On_And_Enable_Operation}
 	};
 
-	PDO_send(motor_pdo_fd, PDO_TX1_ID+MOTOR_EPOS_L_ID, 2, target_left);
-	PDO_send(motor_pdo_fd, PDO_TX1_ID+MOTOR_EPOS_R_ID, 2, target_right);
+	PDO_send(motor_pdo_handle, PDO_TX1_ID+MOTOR_EPOS_L_ID, 2, target_left);
+	PDO_send(motor_pdo_handle, PDO_TX1_ID+MOTOR_EPOS_R_ID, 2, target_right);
 }
 
 void pos_straight(int32_t length) {
@@ -37,11 +37,11 @@ void pos_rotate_grad(double grad) {
 }
 
 
-int ppos_read(int32_t* pos_left, int32_t* vel_left, int32_t* pos_right, int32_t* vel_right) {
-	const int timeout = 1000;
+int32_t ppos_read(int32_t* pos_left, int32_t* vel_left, int32_t* pos_right, int32_t* vel_right) {
+	const int32_t timeout = 1000;
 	my_can_frame f;
 
-	int ret = PDO_read(motor_pdo_fd, &f, timeout);
+	int32_t ret = PDO_read(motor_pdo_handle, &f, timeout);
 	switch(f.id) {
 		case(PDO_RX2_ID + MOTOR_EPOS_R_ID):
 			*pos_right = ((uint32_t)f.data[0]<<0) | ((uint32_t)f.data[1]<<8) | ((uint32_t)f.data[2]<<16) | ((uint32_t)f.data[3]<<24);

@@ -8,14 +8,14 @@
  * \param vel [mm/sec]
  * \return success/error
  */
-int vel_set_speed_left(int32_t vel);
+int32_t vel_set_speed_left(int32_t vel);
 
 
 /**
  * \param vel [mm/sec]
  * \return success/error
  */
-int vel_set_speed_right(int32_t vel);
+int32_t vel_set_speed_right(int32_t vel);
 
 /**
  * Alternative to vel_set_speed_right/left
@@ -23,9 +23,9 @@ int vel_set_speed_right(int32_t vel);
  * \param v_d Robot rotation [milli-rad/sec]
  * \return success/error
  */
-int vel_set_speed(int32_t movement, int32_t rotation);
+int32_t vel_set_speed(int32_t movement, int32_t rotation);
 
-int vel_halt(void);
+int32_t vel_halt(void);
 
 
 /**
@@ -35,7 +35,7 @@ int vel_halt(void);
  * \param vel_* [mm/sec]
  * \return 0 on success, -1 (MOTOR_ERROR) or -2 (MOTOR_TIMEOUT) on failure
  */
-int vel_read(int32_t* pos_left, int32_t* vel_left, int32_t* pos_right,
+int32_t vel_read(int32_t* pos_left, int32_t* vel_left, int32_t* pos_right,
              int32_t* vel_right, int timeout);
 
 #endif

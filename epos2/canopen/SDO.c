@@ -9,7 +9,7 @@
 
 
 /** Automatic calculation of ccd-field for requests **/
-static uint8_t SDO_calculate_ccd(char rw, int size) {
+static uint8_t SDO_calculate_ccd(char rw, int32_t size) {
 	uint8_t base = 0x40;
 	if(rw == 'w') {
 		base = 0x20;
@@ -25,11 +25,11 @@ static uint8_t SDO_calculate_ccd(char rw, int size) {
 }
 
 
-int SDO_write(int fd, const SDO_data* d) {
-	int err;
-	int fillerbytes;
-	const int timeout = 1000;
-	const int buffer = 5;
+int32_t SDO_write(NTCAN_HANDLE handle, const SDO_data* d) {
+	int32_t err;
+	int32_t fillerbytes;
+	const int32_t timeout = 1000;
+	const int32_t buffer = 5;
 	uint16_t cob, cob_r;
 	uint8_t ccd, msb, lsb;
 	my_can_frame f;
@@ -49,9 +49,9 @@ int SDO_write(int fd, const SDO_data* d) {
 	
 
 	// Send write request
-	err = socketcan_write(fd, cob, 5, data);
+	err = socketcan_write(handle, cob, 5, data);
 	if (err != 0) {
-		printd(LOG_ERROR, "socketcan SDO: Could not write to the CAN-bus fd=%d.\n", fd);
+	   printd(LOG_ERROR, "socketcan SDO: Could not write to the CAN-bus handle=%d.\n", handle);
 		return err;
 	}
 
@@ -61,7 +61,7 @@ int SDO_write(int fd, const SDO_data* d) {
 
 	// Wait for result
 	for(int i=0; i<buffer; i++) {
-		err = socketcan_read(fd, &f, timeout/buffer);
+		err = socketcan_read(handle, &f, timeout/buffer);
 		//printf("err=%d node=0x%x index=0x%x sub=0x%x from=0x%x res=0x%x\n", err, d->nodeid, d->index, d->subindex, f.id, f.data[0]);
 		
 		
@@ -82,7 +82,7 @@ int SDO_write(int fd, const SDO_data* d) {
 }
 
 
-int SDO_acknowledge(int fd, const my_can_frame* f) {
+int32_t SDO_acknowledge(NTCAN_HANLDE handle, const my_can_frame* f) {
 	Socketcan_t ack[4];
 	ack[0].size = 1;
 	ack[0].data = SDO_RESPONSE_WRITE_OK;
@@ -96,6 +96,6 @@ int SDO_acknowledge(int fd, const my_can_frame* f) {
 	ack[3].size = 1;
 	ack[3].data = f->data[3]; // subindex
 
-	int nodeid = f->id-SDO_RX;
-	return socketcan_write(fd, SDO_TX+nodeid, 4, ack);
+	uint16_t nodeid = f->id-SDO_RX;
+	return socketcan_write(handle, SDO_TX+nodeid, 4, ack);
 }

@@ -8,30 +8,30 @@
 
 
 // Non-exported function
-static int _vel_speed(int32_t vel, uint16_t nodeid) {
-	int err = 0;
+static int32_t _vel_speed(int32_t vel, uint16_t nodeid) {
+	int32_t err = 0;
 	const int32_t rpm = motor_mmsec_to_rpm(vel);
 	Socketcan_t target_vel[2] = {
 		{4, rpm},
 		{2, Switch_On_And_Enable_Operation}
 	};
 
-	err = PDO_send(motor_pdo_fd, PDO_RX2_ID + nodeid, 2, target_vel);
+	err = PDO_send(motor_pdo_handle, PDO_RX2_ID + nodeid, 2, target_vel);
 	return err;
 }
 
 
-int vel_set_speed_left(int32_t vel) {
+int32_t vel_set_speed_left(int32_t vel) {
 	return _vel_speed(-vel, MOTOR_EPOS_L_ID);
 }
 
 
-int vel_set_speed_right(int32_t vel) {
+int32_t vel_set_speed_right(int32_t vel) {
 	return _vel_speed(vel, MOTOR_EPOS_R_ID);
 }
 
-int vel_set_speed(int32_t movement, int32_t rotation) {
-	int err = 0;
+int32_t vel_set_speed(int32_t movement, int32_t rotation) {
+	int32_t err = 0;
 	double w = rotation/1000.0; // Remove milli
 	int32_t v_r = movement + w*MOTOR_WHEELBASE_RADIUS;
 	int32_t v_l = movement - w*MOTOR_WHEELBASE_RADIUS;
@@ -41,14 +41,14 @@ int vel_set_speed(int32_t movement, int32_t rotation) {
 }
 
 
-int vel_read(int32_t* pos_left, int32_t* vel_left, int32_t* pos_right,
-             int32_t* vel_right, int timeout) {
+int32_t vel_read(int32_t* pos_left, int32_t* vel_left, int32_t* pos_right,
+             int32_t* vel_right, int32_t timeout) {
 
-	int err;
-	int status = 0;
+	int32_t err;
+	int32_t status = 0;
 
 	my_can_frame f;
-	err = PDO_read(motor_pdo_fd, &f, timeout);
+	err = PDO_read(motor_pdo_handle, &f, timeout);
 
 	if(err != 0) {
 		return err;

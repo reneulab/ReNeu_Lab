@@ -15,7 +15,8 @@ enum PDO_n_ID {
 /**
  * \return    0 on sucsess, -1 on error
  */
-int PDO_send(int fp, uint16_t pdo_id, uint8_t length, Socketcan_t data[]);
+int32_t PDO_send(NTCAN_HANDLE handle, uint16_t pdo_id,
+                  uint8_t length, Socketcan_t data[]);
 
 
 /**
@@ -27,6 +28,7 @@ int PDO_send(int fp, uint16_t pdo_id, uint8_t length, Socketcan_t data[]);
  *                  -1 makes the call blocking.
  * \return          0 on success, -1 on error, -2 on timeout
  */
-int PDO_read(int fp, my_can_frame* pdo, int timeout);
+int32_t PDO_read(NTCAN_HANDLE handle, my_can_frame* pdo,
+                 int32_t timeout);
 
 #endif

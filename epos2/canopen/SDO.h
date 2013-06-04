@@ -27,12 +27,12 @@ typedef struct {
  * Sends an SDO_data stuct on the can-bus.
  * \return  0 on success, -1 on error, -2 on timeout
  **/
-int SDO_write(int fd, const SDO_data* d);
+int32_t SDO_write(NTCAN_HANDLE handle, const SDO_data* d);
 
 
 /**
  * Sends an SDO acknowledgement package in return to frame f
  * \return 0 on success
  */
-int SDO_acknowledge(int fd, const my_can_frame* f);
+int32_t SDO_acknowledge(NTCAN_HANDLE handle, const my_can_frame* f);
 #endif

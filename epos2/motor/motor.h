@@ -38,15 +38,15 @@ enum Motor_mode {
 };
 
 
-extern int motor_pdo_fd;
-extern int motor_cfg_fd;
+extern NTCAN_HANDLE motor_pdo_handle;
+extern NTCAN_HANDLE motor_cfg_handle;
 
 /*!
  * Opens the can connection,
  * and configures the two motors
  * \return 0 on success, MOTOR_ERROR (-1) on error
  */
-int motor_init(void);
+int32_t motor_init(void);
 
 
 /*! Closes the CAN connection */
@@ -57,35 +57,35 @@ void motor_close(void);
  * Turns the motors on
  * \return 0 on success, MOTOR_ERROR (-1) on error
  */
-int motor_enable(void);
+int32_t motor_enable(void);
 
 
 /*!
  * Stops the motors as quickly as possible, and holds them there.
  * Run motor_enable() to re-enable the controller.
  */
-int motor_halt(void);
+int32_t motor_halt(void);
 
 
 /*!
  * Turns the motors off (no power).
  * \return 0 on success, MOTOR_ERROR (-1) on error
  */
-int motor_disable(void);
+int32_t motor_disable(void);
 
 /*!
  * Sets the opperation mode (Velocity or Position)
  * \return 0 on success, MOTOR_ERROR (-1) on error
  */
-int motor_setmode(enum Motor_mode mode);
+int32_t motor_setmode(enum Motor_mode mode);
 
 
 /*
  * For internal use in the driver.
  * Converts [mm/sec] to [rpm] and [mm/sec^2] to [rpm/sec]
  */
-int motor_mmsec_to_rpm(int mm_per_sec);
-int motor_rpm_to_mmsec(int rpm);
-int motor_enc_to_mm(int enc);
+int32_t motor_mmsec_to_rpm(int32_t mm_per_sec);
+int32_t motor_rpm_to_mmsec(int32_t rpm);
+int32_t motor_enc_to_mm(int32_t enc);
 
 #endif // LIBMOTOR_H
