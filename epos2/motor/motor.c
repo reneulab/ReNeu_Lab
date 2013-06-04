@@ -12,8 +12,8 @@
 
 
 
-NTCAN_HANDLE motor_pdo_handle = -1; //!< Process CAN-connection.
-NTCAN_HANDLE motor_cfg_handle = -1; //!< Configuration CAN-connection.
+int32_t motor_pdo_handle = -1; //!< Process CAN-connection.
+int32_t motor_cfg_handle = -1; //!< Configuration CAN-connection.
 
 
 static int32_t motor_config_node(uint16_t node) {
@@ -97,25 +97,31 @@ int32_t motor_init(void) {
 	int32_t err = 0;
 
 	// Open two connections to the CAN-network
-	uint16_t pdo_masks[4] = {COB_MASK, COB_MASK, COB_MASK, COB_MASK};
-	uint16_t pdo_filters[4] = {
+//NTCAN*uint16_t pdo_masks[4] = {COB_MASK, COB_MASK, COB_MASK, COB_MASK};
+	int32_t pdo_filters[4] = {
 		PDO_TX1_ID + MOTOR_EPOS_R_ID,
 		PDO_TX2_ID + MOTOR_EPOS_R_ID,
 		PDO_TX1_ID + MOTOR_EPOS_L_ID,
 		PDO_TX2_ID + MOTOR_EPOS_L_ID
 	};
-	motor_pdo_handle = socketcan_open(pdo_filters, pdo_masks, 4);
-
+//	motor_pdo_handle = socketcan_open(pdo_filters, pdo_masks, 4);
+        motor_pdo_handle = initNTCAN(NTCAN_AUTOBAUD,
+             NTCAN_MODE_NO_INTERACTION, pdo_filters, 4, 4,
+             NTCAN_MAX_RX_QUEUESIZE,10000,
+             NTCAN_MAX_TX_QUEUESIZE,10000);
 	uint16_t cfg_masks[5] = {COB_MASK, COB_MASK, COB_MASK, COB_MASK, COB_MASK};
-	uint16_t cfg_filters[5] = {
+	int32_t cfg_filters[5] = {
 		0x00,
 		NMT_TX + MOTOR_EPOS_R_ID,
 		SDO_TX + MOTOR_EPOS_R_ID,
 		NMT_TX + MOTOR_EPOS_L_ID,
 		SDO_TX + MOTOR_EPOS_L_ID
 	};
-	motor_cfg_handle = socketcan_open(cfg_filters, cfg_masks, 5);
-
+//	motor_cfg_handle = socketcan_open(cfg_filters, cfg_masks, 5);
+        motor_cfg_handle = initNTCAN(NTCAN_AUTOBAUD,
+             NTCAN_MODE_NO_INTERACTION, cfg_filters, 5, 5,
+             NTCAN_MAX_RX_QUEUESIZE,10000,
+             NTCAN_MAX_TX_QUEUESIZE,10000);
 	// Check that we connected OK
 	if (motor_pdo_handle == -1 || motor_cfg_handle == -1) {
 		return MOTOR_ERROR;

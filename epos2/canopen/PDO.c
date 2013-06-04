@@ -4,17 +4,17 @@
 #include <string.h>
 
 
-int32_t PDO_send(NTCAN_HANDLE handle, uint16_t pdo_id, uint8_t length, Socketcan_t data[]) {
+int32_t PDO_send(int32_t handle, uint16_t pdo_id, uint8_t length, Socketcan_t data[]) {
 	//uint16_t cob = 0x200 + id;
 	return socketcan_write(handle, pdo_id, length, data);
 }
 
 
-int32_t PDO_read(NTCAN_HANDLE handle, my_can_frame* pdo, 
+int32_t PDO_read(int32_t handle, CMSG* pdo, 
                  int32_t timeout) {
 	// Don't touch callers struct unless we have to
 	int32_t err, func;
-	my_can_frame f;
+	CMSG f;
 
 	err = socketcan_read(handle, &f, timeout);
 	if(err != 0) {

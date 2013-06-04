@@ -614,5 +614,6 @@ EXPORT NTCAN_RESULT CALLTYPE canFormatEvent(
 int32_t errorCheck(int32_t command, NTCAN_RESULT result); 
 
 #ifdef __cplusplus
+}
 #endif /* __cplusplus */
 #endif /* _ntcan_h_ */

@@ -3,7 +3,7 @@
 #include "socketcan/socketcan.h"
 
 
-int NMT_change_state(NTCAN_HANDLE handle, uint8_t nodeid,
+int32_t NMT_change_state(int32_t handle, uint8_t nodeid,
                       enum NMT_transisions state) {
 
 	Socketcan_t data[2];

@@ -25,14 +25,14 @@ static uint8_t SDO_calculate_ccd(char rw, int32_t size) {
 }
 
 
-int32_t SDO_write(NTCAN_HANDLE handle, const SDO_data* d) {
+int32_t SDO_write(int32_t handle, const SDO_data* d) {
 	int32_t err;
 	int32_t fillerbytes;
 	const int32_t timeout = 1000;
 	const int32_t buffer = 5;
 	uint16_t cob, cob_r;
 	uint8_t ccd, msb, lsb;
-	my_can_frame f;
+	CMSG f;
 
 	// Define data
 	cob = SDO_RX + d->nodeid;
@@ -65,7 +65,7 @@ int32_t SDO_write(NTCAN_HANDLE handle, const SDO_data* d) {
 		//printf("err=%d node=0x%x index=0x%x sub=0x%x from=0x%x res=0x%x\n", err, d->nodeid, d->index, d->subindex, f.id, f.data[0]);
 		
 		
-		if(err == 0 && f.dlc >= 4 && f.id == cob_r && f.data[1] == lsb && f.data[2] == msb && f.data[3] == d->subindex) {
+		if(err == 0 && f.len >= 4 && f.id == cob_r && f.data[1] == lsb && f.data[2] == msb && f.data[3] == d->subindex) {
 			// Response recived
 			if(f.data[0] == SDO_RESPONSE_WRITE_OK) {
 				//printf("ok\n\n");
@@ -82,7 +82,7 @@ int32_t SDO_write(NTCAN_HANDLE handle, const SDO_data* d) {
 }
 
 
-int32_t SDO_acknowledge(NTCAN_HANLDE handle, const my_can_frame* f) {
+int32_t SDO_acknowledge(int32_t handle, const CMSG* f) {
 	Socketcan_t ack[4];
 	ack[0].size = 1;
 	ack[0].data = SDO_RESPONSE_WRITE_OK;

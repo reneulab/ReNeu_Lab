@@ -47,7 +47,7 @@ int32_t vel_read(int32_t* pos_left, int32_t* vel_left, int32_t* pos_right,
 	int32_t err;
 	int32_t status = 0;
 
-	my_can_frame f;
+	CMSG f;
 	err = PDO_read(motor_pdo_handle, &f, timeout);
 
 	if(err != 0) {

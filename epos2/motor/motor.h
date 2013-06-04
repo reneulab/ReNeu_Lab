@@ -38,8 +38,8 @@ enum Motor_mode {
 };
 
 
-extern NTCAN_HANDLE motor_pdo_handle;
-extern NTCAN_HANDLE motor_cfg_handle;
+extern int32_t motor_pdo_handle;
+extern int32_t motor_cfg_handle;
 
 /*!
  * Opens the can connection,

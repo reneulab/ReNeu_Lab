@@ -1,16 +1,16 @@
 
 CC = gcc
 CFLAGS = -std=gnu99 -fPIC -Wall -Werror -Wextra -Wno-unused -O2 -I .
-LDFLAGS = -std=gnu99 -Werror -L .
+LDFLAGS = -std=gnu99 -Werror -ldl -L .
 LDFLAGS_SO = $(LDFLAGS) -shared -fPIC
 
 
 .SUFFIXES: .c .h .o .so
 .PHONY: all  clean
+MYTEST_SRC = socketcan/myTest.c 
 
-
-SOCKETCAN_SRC = socketcan/socketcan.c socketcan/printd.c
-SOCKETCAN_OBJ = $(SOCKETCAN_SRC:.c=.o)
+SOCKETCAN_SRC = socketcan/socketcan.c socketcan/printd.c socketcan/myTest.c
+SOCKETCAN_OBJ = $(SOCKETCAN_SRC:.c=.o) 
 SOCKETCAN_LIB = libsocketcan.so
 
 CANOPEN_SRC = canopen/NMT.c canopen/PDO.c canopen/SDO.c
@@ -33,7 +33,7 @@ MOTORTEST_TARG = motortest
 all: $(MOTORTEST_TARG)
 
 $(SOCKETCAN_LIB): $(SOCKETCAN_OBJ)
-	$(CC) $(SOCKETCAN_OBJ) $(LDFLAGS_SO)  -o $(SOCKETCAN_LIB)
+	$(CC) $(SOCKETCAN_OBJ) socketcan/ntcan.o socketcan/canerror.o $(LDFLAGS_SO)  -o $(SOCKETCAN_LIB)
 
 $(CANOPEN_LIB): $(CANOPEN_OBJ) $(SOCKETCAN_LIB)
 	$(CC) $(CANOPEN_OBJ) $(LDFLAGS_SO) -lsocketcan -o $(CANOPEN_LIB)

@@ -39,7 +39,7 @@ void pos_rotate_grad(double grad) {
 
 int32_t ppos_read(int32_t* pos_left, int32_t* vel_left, int32_t* pos_right, int32_t* vel_right) {
 	const int32_t timeout = 1000;
-	my_can_frame f;
+	CMSG f;
 
 	int32_t ret = PDO_read(motor_pdo_handle, &f, timeout);
 	switch(f.id) {

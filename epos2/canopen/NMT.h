@@ -21,7 +21,7 @@ enum NMT_transisions {
  * \param responses Number of expected responses
  * \return 0 on success, -1 on error
  */
-int32_t NMT_change_state(NTCAN_HANDLE HANLDE, uint8_t nodeid, 
+int32_t NMT_change_state(int32_t HANLDE, uint8_t nodeid, 
                      enum NMT_transisions state);
 
 #endif
