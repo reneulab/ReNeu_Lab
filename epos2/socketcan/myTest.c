@@ -208,7 +208,7 @@ int32_t errorCheck( int32_t command,
          }
          
    }
-   printf("Unknown Error"); 
+   printf("Unknown Error\n"); 
    return 1; 
 }
 

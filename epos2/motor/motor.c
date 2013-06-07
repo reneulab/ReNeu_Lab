@@ -124,7 +124,8 @@ int32_t motor_init(void) {
              NTCAN_MAX_TX_QUEUESIZE,10000);
 	// Check that we connected OK
 	if (motor_pdo_handle == -1 || motor_cfg_handle == -1) {
-		return MOTOR_ERROR;
+	       printd(LOG_ERROR, "Improper Config\n"); 	
+               return MOTOR_ERROR;
 	}
 
 	// Configure each node
