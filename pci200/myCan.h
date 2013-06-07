@@ -7,7 +7,7 @@
 /*        length of ID array, number of physical nets				*/
 /*        max size of rx buffer, timeout for rx						*/
 /*        max size of tx buffer, timeout for tx						*/
-/*    OUT: 0 if success, 1 if error										*/
+/*    OUT: handle if success, 0xFFFF if error						*/
 /***************************************************************/
 
 int32_t initNTCAN(uint32_t baud, 	uint32_t flags,
