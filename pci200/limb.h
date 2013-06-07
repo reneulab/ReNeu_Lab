@@ -1,4 +1,5 @@
 #include "ntcan.h"
+#include "myCan.h"
 
 typedef enum {THUMB_OPEN,	THUMB_CLOSE,
               STANDARD_OPEN, 	STANDARD_CLOSE} modes; 
