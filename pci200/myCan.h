@@ -13,7 +13,7 @@
 int32_t initNTCAN(uint32_t baud, 	uint32_t flags,
 						int32_t ID[], 		int32_t len, int32_t net,
 						int32_t rxSize, 	int32_t rxTime,
-						int32_t rxSize, 	int32_t txTime);
+						int32_t TxSize, 	int32_t txTime);
 
 
 /***************************************************************/
@@ -39,7 +39,8 @@ int32_t readNTCAN(NTCAN_HANDLE handle, CMSG *msg, int32_t len);
 /***************************************************************/
 /*		      Writes data in msg to NTCAN device 						*/
 /*    IN: Handle of NTCAN device											*/
+/*			 length of message to write in bytes						*/
 /*			 MSG struct with ID of device and length preset			*/
 /*		OUT: 0 if success, 1 if error 									*/
 /***************************************************************/
-int32_t writeNTCAN(NTCAN_HANDLE handle, CMSG *msg);
+int32_t writeNTCAN(NTCAN_HANDLE handle,int32_t len, CMSG *msg);

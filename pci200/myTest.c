@@ -1,5 +1,9 @@
 /*************************************************/
-#include "myCan.h"
+#include "limb.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 int32_t main(void) 
 {
@@ -20,9 +24,9 @@ int32_t main(void)
    sleep(1); 
    jawChuck(handle, THUMB_CLOSE, ID[0]);
    sleep(1); 
-   jawCHUCK(handle, STANDARD_OPEN, ID[0]);
+   jawChuck(handle, STANDARD_OPEN, ID[0]);
    sleep(1); 
-   jawCHUCK(handle, STANDARD_CLOSE, ID[0]);
+   jawChuck(handle, STANDARD_CLOSE, ID[0]);
    sleep(1); 
    natural(handle, ID[0]);
    sleep(1); 
@@ -43,11 +47,12 @@ int32_t main(void)
    point(handle, ID[0]);  
    sleep(1);
 // Can close
-   result = closeNTCAN(handle, ID[], 1); 
+   result = closeNTCAN(handle, ID, 1); 
 	if(result != 0) {
    printf("closeNTCAN error \n");
    return 1; }
    printf("Successful uses :]\n"); 
+   return 0; 
 }
 
 

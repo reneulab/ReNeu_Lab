@@ -1,18 +1,19 @@
 CC=gcc
 CFLAGS=-Wall
+LDFLAGS=-ldl
+OBJECTS=myTest.o limb.o myCan.o ntcan.o canerror.o 
+EXECUTABLE=myTest
+
+all: $(EXECUTABLE)
+
+$(EXECUTABLE): $(OBJECTS) 
 
 
-myTest : limb.o myTest.o
-	gcc -o myTest limb.o myTest.o
+myTest.o: limb.o myTest.c
 
-myTest.o : limb.o myTest.c
-	gcc -c myTest.c 
+limb.o: myCan.o limb.c
 
-limb.o : myCan.o limb.c
-	gcc -c limb.c 
+myCan.o: canerror.o ntcan.o myCan.c
 
-myCan.o : canerror.o ntcan.o myCan.c
-	gcc -c myCan.c 
-
-
-clean: rm -f myTest myTest.o limb.o myCan.o
+clean:
+	rm -f $(EXECUTABLE) myTest.o limb.o myCan.o 
