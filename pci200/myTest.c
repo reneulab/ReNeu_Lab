@@ -28,7 +28,7 @@ int32_t main(void)
    sleep(1); 
    normal(handle, ID[0]);
    sleep(1); 
-   park(handle, CONTINIOUS, ID[0]);
+   park(handle, CONTINUOUS, ID[0]);
    sleep(1); 
    park(handle, QUICK, ID[0]);
    sleep(1); 
