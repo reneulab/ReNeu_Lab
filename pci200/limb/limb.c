@@ -1,5 +1,7 @@
 #include "limb.h" 
 
+/*****************************************************************/
+/*****************************************************************/
 int32_t grip(NTCAN_HANDLE handle, int32_t ID) 
 {
    int32_t result;
@@ -15,6 +17,9 @@ int32_t grip(NTCAN_HANDLE handle, int32_t ID)
 	return 0;  
 }
 
+
+/****************************************************************/
+/****************************************************************/
 int32_t jawChuck(NTCAN_HANDLE handle, int32_t mode, int32_t ID)
 {
    int32_t result; 
@@ -46,6 +51,8 @@ int32_t jawChuck(NTCAN_HANDLE handle, int32_t mode, int32_t ID)
 	return 0;  
 }
 
+/****************************************************************/
+/****************************************************************/
 int32_t lockout(NTCAN_HANDLE handle, int32_t ID) 
 {
    CMSG *msg;
@@ -61,6 +68,8 @@ int32_t lockout(NTCAN_HANDLE handle, int32_t ID)
 	return 0;  
 }
 
+/****************************************************************/
+/****************************************************************/
 int32_t natural(NTCAN_HANDLE handle, int32_t ID)
 {
    CMSG *msg;
@@ -76,6 +85,8 @@ int32_t natural(NTCAN_HANDLE handle, int32_t ID)
 	return 0;  
 }
 
+/****************************************************************/
+/****************************************************************/
 int32_t normal(NTCAN_HANDLE handle, int32_t ID)
 {
    CMSG *msg;
@@ -91,6 +102,8 @@ int32_t normal(NTCAN_HANDLE handle, int32_t ID)
 	return 0;  
 }
 
+/****************************************************************/
+/****************************************************************/
 int32_t park(NTCAN_HANDLE handle, int32_t speed, int32_t ID)
 {
    CMSG *msg;
@@ -116,6 +129,8 @@ int32_t park(NTCAN_HANDLE handle, int32_t speed, int32_t ID)
 	return 0;  
 }
 
+/****************************************************************/
+/****************************************************************/
 int32_t pinch(NTCAN_HANDLE handle, int32_t mode, int32_t ID) 
 {
    CMSG *msg;
@@ -147,6 +162,8 @@ int32_t pinch(NTCAN_HANDLE handle, int32_t mode, int32_t ID)
 	return 0;  
 }
 
+/****************************************************************/
+/****************************************************************/
 int32_t point(NTCAN_HANDLE handle, int32_t ID) 
 {
 	CMSG *msg;
@@ -161,6 +178,5 @@ int32_t point(NTCAN_HANDLE handle, int32_t ID)
 		{ return 1; }
 	return 0;  
 }
-
 
 

@@ -1,9 +1,6 @@
 /* Library for simple use of can fuctions defined in ntcan.h */
 /*************************************************/
 #include "myCan.h"
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
 
 /* Used for error checker */
 #define CAN_SET_BAUDRATE				1
@@ -203,61 +200,61 @@ int32_t errorCheck( int32_t command,
 
 /****************************************************************/
 int32_t initNTCAN(uint32_t baud,  uint32_t flags,
-						int32_t ID[], 	 int32_t len,  int32_t net,
+						int32_t ID[], 	 int32_t net,
 		 				int32_t rxSize, int32_t rxTime,
 		 				int32_t txSize, int32_t txTime)
 {
-   NTCAN_HANDLE		handle;    // 
-   NTCAN_RESULT		result;    // Used for checking for error
-   int32_t		i;         // Index for multiple objects
-   int32_t		timeout=0;   // Current number of timeouts
+   NTCAN_HANDLE		handle;    	// 
+   NTCAN_RESULT		result;    	// Used for checking for error
+   int32_t		i;       	  		// Index for multiple objects
+   int32_t		timeout=0;   		// Current number of timeouts
 /* Open can */  
    result = canOpen(net,flags,txSize,rxSize,   // Opens device
                     txTime,rxTime,&handle);
-   if(errorCheck(CAN_OPEN,result) != 0)  // Error check
-      { return 1; } // returns NULL if error
+   if(errorCheck(CAN_OPEN,result) != 0)  			// Error check
+      { return 0xFFFF; }								// returns 1 if error
    printf("canOpen() success\n");
 /* Setting baudrate */   
-   result = canSetBaudrate(handle,baud);   // sets baudrate
+   result = canSetBaudrate(handle,baud);   		// sets baudrate
    if(errorCheck(CAN_SET_BAUDRATE,result) != 0) // Error check
-      { return 1; } // returns NULL if error
-   result = canGetBaudrate(handle,&baud);  // Reads buadrate
+      { return 0xFFFF; }								// returns 1 if error
+   result = canGetBaudrate(handle,&baud);  		// Reads buadrate
    printf("canSetBaudrate() success. Baudrate is %d\n",baud);
 /* Adding an ID */
-	for(i=0; i<len; i++) {
-      do  { result = canIdAdd(handle,ID[i]);
-            // repeat if Timeout 
-            timeout++;
+	for(i=1; i<ID[0]; i++) {
+      do  { result = canIdAdd(handle,ID[i]); 	// Adds ID to handle
+            timeout++; 									// reapeat if Timeout	
             if(timeout>MAX_TIMEOUT) {
                printf("Max timeout out reached, Aborting addID\n");
-               return 1;}  // return if repeated error
+               return 0xFFFF;}  // return if repeated error
           } while( errorCheck(CAN_ID_ADD,result) == 2); 
-      if(errorCheck(CAN_ID_ADD,result) != 0) // error check
-         { return 1; }
+      if(errorCheck(CAN_ID_ADD,result) != 0) 	// error check
+         { return 0xFFFF; }
    printf("canIdAdd() successful\n"); 
    }
    printf("Initializing sucessfull\n");
 /* Flushing FIFO buffer */
    result = canIoctl(handle,NTCAN_IOCTL_FLUSH_RX_FIFO,NULL);   
-   if(errorCheck(CAN_IO_CTL,result) != 0) // flushing FIFO
-      { return 1; }  // error check
+   if(errorCheck(CAN_IO_CTL,result) != 0) 		// flushing FIFO
+      { return 0xFFFF; } 								// error check
    printf("System flushed, device ready to use\n");
-   return handle; 
+   return handle; // returns handle for NTCAN device 
 }
 
 /****************************************************************/
-int32_t closeNTCAN(NTCAN_HANDLE handle, int32_t ID[], int32_t len)
+/****************************************************************/
+int32_t closeNTCAN(NTCAN_HANDLE handle, int32_t ID[])
 {
    NTCAN_RESULT	result;
    int32_t 			timeout = 0;
    int32_t			i=0;  
 /* Flushing system */  
    result = canIoctl(handle, NTCAN_IOCTL_FLUSH_RX_FIFO, NULL);   
-   if(errorCheck(CAN_IO_CTL,result) != 0) // error check 
+   if(errorCheck(CAN_IO_CTL,result) != 0) 		// error check 
    	{ return 1; }
    printf("System Flushed\n");
 /* Deleting ID */     
-	for(i=0; i<len; i++) {
+	for(i=1; i<ID[0]; i++) {
 // Deletes all ids and retrys if timeout error       
    	do  { 
 			result = canIdDelete(handle, ID[i]); 
@@ -292,12 +289,12 @@ int32_t readNTCAN(NTCAN_HANDLE handle, CMSG *msg, int32_t len)
          if(timeout > MAX_TIMEOUT) {
             result = canIoctl(handle, NTCAN_IOCTL_ABORT_RX, NULL);
             if(errorCheck(CAN_IO_CTL,result != 0))
-              { return 1; } // error check
+              { return 1; } 									// error check
             printf("Repeated Timeout, read aborted\n");
             return 2; }
       } while(errorCheck(CAN_READ,result) == 2); 
       if(errorCheck(CAN_READ,result) != 0)
-         { return 1; }  // error check
+         { return 1; }  										// error check
 /* Printing read object of NTCAN device to screen */
       printf("readNTCAN() successfull\n") ;
       printf("ID of NTCAN device: %d\n", msg->id);
