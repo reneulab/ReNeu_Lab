@@ -1,5 +1,5 @@
 /*************************************************/
-#include "./limb/limb.h"
+#include "limb/limb.h"
 #include <stdio.h>
 #include <unistd.h>
 

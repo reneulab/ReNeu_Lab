@@ -1,4 +1,4 @@
-#include "../canLib/myCan.h"
+#include "canLib/myCan.h"
 
 #define  THUMB_OPEN 		1
 #define 	THUMB_CLOSE 	2 
