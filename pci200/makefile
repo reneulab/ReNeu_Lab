@@ -1,21 +1,20 @@
 CC=gcc
 CFLAGS=-Wall
 LDFLAGS=-ldl
-OBJ=myTest.o limb.o
+OBJ=myTest.o limb.o myCan.o $(CAN_OBJ) 
 EXECUTABLE=myTest
 CAN_OBJ=canerror.o ntcan.o
-VPATH=canLib:limb
 
 all: $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJ) 
 	gcc -o myTest $(OBJ)
 
-myTest.o: limb.o myTest.c 
+myTest.o: limb.o myTest.c
 
-limb.o: myCan.o limb.c
+limb.o: myCan.o limb.c 
 
-myCan.o: $(CAN_OBJ) myCan.c
+myCan.o: $(CAN_OBJ) myCan.c 
 
 .PHONY:clean
 clean:

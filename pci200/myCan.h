@@ -40,9 +40,7 @@ int32_t closeNTCAN(NTCAN_HANDLE handle, int32_t ID[]);
 /*				buffer to store data read 									*/
 /*				Length of data to read in bytes							*/
 /*		 OUT: 0 if success, 1 if error, 2 if Timeout error			*/
-/*******nt32_t initNTCAN(uint32_t baud,    uint32_t flags,
-                  int32_t ID[],     int32_t net,
-********************************************************/
+/*******:********************************************************/
 
 int32_t readNTCAN(NTCAN_HANDLE handle, CMSG *msg, int32_t len);
 
