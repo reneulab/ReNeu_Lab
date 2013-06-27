@@ -7,79 +7,67 @@
 #define	STANDARD_CLOSE 4 
 #define  CONTINUOUS 		5
 #define  QUICK				6 
+
+typedef enum {
+	l_stop 	= 0,
+	l_close	= 1,
+	l_open 	= 2,
+	s_close 	= 3,
+	s_open 	= 4, 
+} handMode;
+
+typedef enum {
+	thumb 	= 0x101,
+	pointer 	= 0x102,
+	middle	= 0x103,
+	index 	= 0x104,
+	pinky 	= 0x105 
+} finger;  
+
+typedef struct {
+ 	finger	digit;
+	handMode mode; 
+	int32_t 	speed;
+} command;    
+	
+
+
+
  
 /***************************************************************/
-/*                Function: grip() 										*/
+/*                Function: writeLimb()								*/
 /*			In: 	handle for ntcan device									*/
-/*					ID of i-limb device to be controlled				*/
+/*					type command of desired movement						*/
 /*			Out: 	0 if success, 1 if error 								*/
 /***************************************************************/ 
-int32_t grip(NTCAN_HANDLE handle, int32_t ID);
+int32_t writeLimb(NTCAN_HANDLE handle, command *myCmd);
 
-
+ 
 /***************************************************************/
-/*                Function: jawChuck()									*/
+/*                Function: readLimb()									*/
 /*			In: 	handle for ntcan device									*/
-/*					mode (as defined in enum mode) of movement		*/
-/*					ID of i-limb device to be controlled				*/
+/*					type command of desired movement						*/
 /*			Out: 	0 if success, 1 if error 								*/
-/***************************************************************/
-int32_t jawChuck(NTCAN_HANDLE handle, int32_t mode, int32_t ID);
+/***************************************************************/ 
+int32_t readLimb(NTCAN_HANDLE handle, command *myCmd);
 
-
+ 
 /***************************************************************/
-/*                Function: lockout() 									*/
+/*                Function: writeLimb()								*/
 /*			In: 	handle for ntcan device									*/
-/*					ID of i-limb device to be controlled				*/
+/*				 	digit to open												*/
 /*			Out: 	0 if success, 1 if error 								*/
-/***************************************************************/
-int32_t lockout(NTCAN_HANDLE handle, int32_t ID);
+/***************************************************************/ 
+int32_t openLimb(NTCAN_HANDLE handle, finger myDigit);
 
-
+ 
 /***************************************************************/
-/*                Function: natural 									*/
+/*                Function: writeLimb()								*/
 /*			In: 	handle for ntcan device									*/
-/*					ID of i-limb device to be controlled				*/
+/*					digit to close												*/
 /*			Out: 	0 if success, 1 if error 								*/
-/***************************************************************/
-int32_t natural(NTCAN_HANDLE handle, int32_t ID);
+/***************************************************************/ 
+int32_t closeLimb(NTCAN_HANDLE handle, finger myDigit);
 
-
-/***************************************************************/
-/*                Function: normal() 									*/
-/*			In: 	handle for ntcan device									*/
-/*					ID of i-limb device to be controlled				*/
-/*			Out: 	0 if success, 1 if error 								*/
-/***************************************************************/
-int32_t normal(NTCAN_HANDLE handle, int32_t ID); 
-
-
-/***************************************************************/
-/*                Function: park() 										*/
-/*			In: 	handle for ntcan device									*/
-/*					speed(defined by enum speed) of movement			*/
-/*					ID of i-limb device to be controlled				*/
-/*			Out: 	0 if success, 1 if error 								*/
-/***************************************************************/
-int32_t park(NTCAN_HANDLE handle, int32_t speed, int32_t ID); 
-
-
-/***************************************************************/
-/*                Function: pinch() 									*/
-/*			In: 	handle for ntcan device									*/
-/*             mode(defined in enum mode) for desired movement	*/			
-/*					ID of i-limb device to be controlled				*/
-/*			Out: 	0 if success, 1 if error 								*/
-/***************************************************************/
-int32_t pinch(NTCAN_HANDLE handle, int32_t mode, int32_t ID);
-
-
-/***************************************************************/
-/*                Function: point() 									*/
-/*			In: 	handle for ntcan device									*/
-/*					ID of i-limb device to be controlled				*/
-/*			Out: 	0 if success, 1 if error 								*/
-/***************************************************************/
-int32_t point(NTCAN_HANDLE handle, int32_t ID);
 
 

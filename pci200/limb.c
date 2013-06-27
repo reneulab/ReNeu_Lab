@@ -1,183 +1,116 @@
 
 #include "limb.h" 
 
-/*****************************************************************/
-/*****************************************************************/
-int32_t grip(NTCAN_HANDLE handle, int32_t ID) 
-{
-   int32_t result;
-   CMSG msg; 
-
-   msg.id = ID;
-   msg.len = 2;
-   msg.data[0] = 0x05;
-   msg.data[1] = 0x00;
-   result = writeNTCAN(handle,2, &msg);
-   if(result != 0) 
-		{ return 1; }
-	return 0;  
-}
-
-
 /****************************************************************/
 /****************************************************************/
-int32_t jawChuck(NTCAN_HANDLE handle, int32_t mode, int32_t ID)
-{
-   int32_t result; 
-   CMSG msg;
-	
-	msg.id = ID; 
-   msg.len = 2;
-   msg.data[1] = 0x00; 
-   switch(mode) {
-		case THUMB_OPEN:
-			msg.data[0] = 0x0E;
-         break;
-      case THUMB_CLOSE:
-	 		msg.data[0] = 0x0B;
-    	 	break;
-		case STANDARD_OPEN: 
-			msg.data[0] =  0x0D;
-			break;
-		case STANDARD_CLOSE:
-			msg.data[0] = 0x02;
-			break;
-		default:
-			msg.data[0] = 0xFF;
-			return 2;
-	}  
-   result = writeNTCAN(handle,2, &msg);
-   if(result != 0) 
-	{ return 1; }
-	return 0;  
-}
-
-/****************************************************************/
-/****************************************************************/
-int32_t lockout(NTCAN_HANDLE handle, int32_t ID) 
-{
-   CMSG msg;
-   int32_t result;
-
-	msg.id = ID;
-	msg.len = 2;
-	msg.data[0] = 0x0C;
-	msg.data[1] = 0x00;   
-   result = writeNTCAN(handle,2, &msg);
-   if(result != 0) 
-		{ return 1; }
-	return 0;  
-}
-
-/****************************************************************/
-/****************************************************************/
-int32_t natural(NTCAN_HANDLE handle, int32_t ID)
-{
-   CMSG msg;
-	int32_t result;
-
-	msg.id = ID;
-	msg.len = 2;
-   msg.data[0] = 0x08;
-	msg.data[1] = 0x00;   
-   result = writeNTCAN(handle,2, &msg);
-   if(result != 0) 
-		{ return 1; }
-	return 0;  
-}
-
-/****************************************************************/
-/****************************************************************/
-int32_t normal(NTCAN_HANDLE handle, int32_t ID)
-{
-   CMSG msg;
-	int32_t result;
-
-	msg.id = ID;
-	msg.len = 2;
-	msg.data[0] = 0x00;
-	msg.data [1] = 0x00;   
-   result = writeNTCAN(handle,2, &msg);
-   if(result != 0) 
-		{ return 1; }
-	return 0;  
-}
-
-/****************************************************************/
-/****************************************************************/
-int32_t park(NTCAN_HANDLE handle, int32_t speed, int32_t ID)
-{
-   CMSG msg;
-   int32_t result;
-
-	msg.id = ID;
-	msg.len = 2;
-	msg.data[1] = 0x00; 
-	switch(speed) {
-		case CONTINUOUS:
-			msg.data[0] = 0x03;
-			break;
-		case QUICK:
-			msg.data[0] = 0x04;
-			break;
-		default:
-			msg.data[0] = 0x0FF; 
-			return 2;
-	}
-   result = writeNTCAN(handle,2, &msg);
-   if(result != 0) 
-		{ return 1; }
-	return 0;  
-}
-
-/****************************************************************/
-/****************************************************************/
-int32_t pinch(NTCAN_HANDLE handle, int32_t mode, int32_t ID) 
-{
-   CMSG msg;
-   int32_t result;
-
-	msg.id = ID;
-	msg.len = 2;
-	msg.data[1] = 0x00;
-	switch(mode) {
-		case THUMB_OPEN:
-			msg.data[0] = 0x0A;
-         break;
-      case THUMB_CLOSE:
-	 		msg.data[0] = 0x09;
-    	 	break;
-		case STANDARD_OPEN: 
-			msg.data[0] =  0x07;
-			break;
-		case STANDARD_CLOSE:
-			msg.data[0] = 0x01;
-			break;
-		default:
-			msg.data[0] = 0xFF;
-			return 2;
-	} 
-   result = writeNTCAN(handle,2, &msg);
-   if(result != 0) 
-		{ return 1; }
-	return 0;  
-}
-
-/****************************************************************/
-/****************************************************************/
-int32_t point(NTCAN_HANDLE handle, int32_t ID) 
+int32_t writeLimb(NTCAN_HANDLE handle, command *myCmd) 
 {
 	CMSG msg;
    int32_t result;
 
-   msg.id = ID;
+   msg.id = myCmd->digit;
 	msg.len = 2;
-	msg.data[0] = 0x06;
-	msg.data[1] = 0x00; 
+	msg.data[0] = myCmd->speed;
+	msg.data[1] = myCmd->mode; 
    result = writeNTCAN(handle,2, &msg);
    if(result != 0) 
-		{ return 1; }
+		{  msg.data[0] = l_stop;
+			writeNTCAN(handle,2, &msg);
+			return 1; }
 	return 0;  
 }
+
+
+/***************************************************************/
+/***************************************************************/
+int32_t readLimb(NTCAN_HANDLE handle, command *myCmd)
+{
+	CMSG msg;
+	int32_t result;
+
+	msg.id = myCmd->digit + 0x100;
+	msg.len = 2;   
+	result = readNTCAN(handle,&msg,2);
+	myCmd->mode = msg.data[1];
+	myCmd->speed = msg.data[0]; 
+	if(result != 0)
+		{ return 1; }
+	return 0;
+} 
+		 
+/***************************************************************/
+/***************************************************************/
+int32_t openLimb(NTCAN_HANDLE handle, finger myDigit) 
+{
+	command myCmd;
+	int32_t result;
+
+	myCmd.digit = myDigit;
+	myCmd.mode 	= l_open; 
+	myCmd.speed = 200;
+	result = writeLimb(handle, &myCmd);  
+	if(result != 0)
+		{ return 1; }
+/* Get feedback until finger is open all the way */	
+	do {
+		result = readLimb(handle, &myCmd);
+		if(result != 0)
+			{ return 1; }
+		} while (myCmd.mode != s_open);
+/* Stop motor on finger */
+	myCmd.mode = l_stop;
+	myCmd.speed = 100; 
+	result = writeLimb(handle, &myCmd);
+	if(result != 0)
+		{ return 1; }
+/* Check to make sure motor is stopped */
+	do {
+		result = readLimb(handle, &myCmd);
+		if(result != 0)
+			{ return 1; }
+		} while (myCmd.mode != l_stop);
+	return 0; 
+}
+	 
+int32_t closeLimb(NTCAN_HANDLE handle, finger myDigit) 
+{
+	command myCmd;
+	int32_t result;
+
+	myCmd.digit = myDigit;
+	myCmd.mode 	= l_close; 
+	myCmd.speed = 200;
+	result = writeLimb(handle, &myCmd);  
+	if(result != 0)
+		{ return 1; }
+/* Get feedback until finger is open all the way */	
+	do {
+		result = readLimb(handle, &myCmd);
+		if(result != 0)
+			{ return 1; }
+		} while (myCmd.mode != s_close);
+/* Stop motor on finger */
+	myCmd.mode = l_stop;
+	myCmd.speed = 100; 
+	result = writeLimb(handle, &myCmd);
+	if(result != 0)
+		{ return 1; }
+/* Check to make sure motor is stopped */
+	do {
+		result = readLimb(handle, &myCmd);
+		if(result != 0)
+			{ return 1; }
+		} while (myCmd.mode != l_stop);
+	return 0; 
+}
+	
+
+
+
+
+
+
+
+
 
 
