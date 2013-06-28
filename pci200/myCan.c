@@ -43,7 +43,7 @@
 int32_t errorCheck( int32_t command,
                    NTCAN_RESULT result) {
 
-   printf("command: %d,result: %d\n",command,result);
+   //printf("command: %d,result: %d\n",command,result);
    switch(result) {
       case NTCAN_SUCCESS: 
          return 0; break;
@@ -280,7 +280,7 @@ int32_t readNTCAN(NTCAN_HANDLE handle, CMSG *msg, int32_t len)
  {
    NTCAN_RESULT 	result;
    int32_t			i;
-   int32_t 			timeout; 
+   int32_t 			timeout=0; 
 /* Reading Object of NTCAN device */  
       do { 
 			result = canRead(handle,msg, &len, NULL); 
@@ -297,9 +297,9 @@ int32_t readNTCAN(NTCAN_HANDLE handle, CMSG *msg, int32_t len)
          { return 1; }  										// error check
 /* Printing read object of NTCAN device to screen */
       printf("readNTCAN() successfull\n") ;
-      printf("ID of NTCAN device: %d\n", msg->id);
+      printf("ID of NTCAN device: %x\n", msg->id);
       printf("Length of message recieved: %d\n", (len & 0x0F) );
-      for(i=0;i<(len & 0x0F);i++) {
+      for(i=0;i<(msg->len);i++) {
          printf("Byte %d of recieved message: %d\n", i, 
                  msg->data[i]);
       } 

@@ -51,14 +51,16 @@ int32_t main(void)
 // Writing test two //
 	msg.id = 0x101;
 	msg.len = 2;
-	msg.data[0] = 0x01;
+	msg.data[0] = 0x0A;
 	msg.data[1] = 0x00; 
 	printf("Control mode two\n");
+        printf("ID: %x Data: %d\n", msg.id, msg.data[0]);
 	result = writeNTCAN(handle,1,&msg);
 	if(result != 0)
 	{
 		printf("Error in Write\n");
 	}
+        sleep(1);
 	 
 // Closing //   
   result = closeNTCAN(handle, ID);
