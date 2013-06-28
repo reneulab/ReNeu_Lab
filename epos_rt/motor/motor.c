@@ -12,13 +12,13 @@
 
 
 
-int32_t motor_pdo_handle = -1; //!< Process CAN-connection.
-int32_t motor_cfg_handle = -1; //!< Configuration CAN-connection.
+int motor_pdo_fd = -1; //!< Process CAN-connection.
+int motor_cfg_fd = -1; //!< Configuration CAN-connection.
 
 
-static int32_t motor_config_node(uint16_t node) {
-	int32_t err = 0;
-	int32_t num_PDOs;
+static int motor_config_node(uint16_t node) {
+	int err = 0;
+	int num_PDOs;
 
 	// Set Configuration parameters
 	err |= epos_Maximal_Profile_Velocity(node, motor_mmsec_to_rpm(MOTOR_MAX_SPEED));
@@ -93,43 +93,36 @@ static int32_t motor_config_node(uint16_t node) {
 }
 
 
-int32_t motor_init(void) {
-	int32_t err = 0;
+int motor_init(void) {
+	int err = 0;
 
 	// Open two connections to the CAN-network
-//NTCAN*uint16_t pdo_masks[4] = {COB_MASK, COB_MASK, COB_MASK, COB_MASK};
-	int32_t pdo_filters[4] = {
+	uint16_t pdo_masks[4] = {COB_MASK, COB_MASK, COB_MASK, COB_MASK};
+	uint16_t pdo_filters[4] = {
 		PDO_TX1_ID + MOTOR_EPOS_R_ID,
 		PDO_TX2_ID + MOTOR_EPOS_R_ID,
 		PDO_TX1_ID + MOTOR_EPOS_L_ID,
 		PDO_TX2_ID + MOTOR_EPOS_L_ID
 	};
-//	motor_pdo_handle = socketcan_open(pdo_filters, pdo_masks, 4);
-        motor_pdo_handle = initNTCAN(NTCAN_AUTOBAUD,
-             NTCAN_MODE_NO_INTERACTION, pdo_filters, 4, 4,
-             NTCAN_MAX_RX_QUEUESIZE,10000,
-             NTCAN_MAX_TX_QUEUESIZE,10000);
+	motor_pdo_fd = socketcan_open(pdo_filters, pdo_masks, 4);
+
 	uint16_t cfg_masks[5] = {COB_MASK, COB_MASK, COB_MASK, COB_MASK, COB_MASK};
-	int32_t cfg_filters[5] = {
+	uint16_t cfg_filters[5] = {
 		0x00,
 		NMT_TX + MOTOR_EPOS_R_ID,
 		SDO_TX + MOTOR_EPOS_R_ID,
 		NMT_TX + MOTOR_EPOS_L_ID,
 		SDO_TX + MOTOR_EPOS_L_ID
 	};
-//	motor_cfg_handle = socketcan_open(cfg_filters, cfg_masks, 5);
-        motor_cfg_handle = initNTCAN(NTCAN_AUTOBAUD,
-             NTCAN_MODE_NO_INTERACTION, cfg_filters, 5, 5,
-             NTCAN_MAX_RX_QUEUESIZE,10000,
-             NTCAN_MAX_TX_QUEUESIZE,10000);
+	motor_cfg_fd = socketcan_open(cfg_filters, cfg_masks, 5);
+
 	// Check that we connected OK
-	if (motor_pdo_handle == -1 || motor_cfg_handle == -1) {
-	       printd(LOG_ERROR, "Improper Config\n"); 	
-               return MOTOR_ERROR;
+	if (motor_pdo_fd == -1 || motor_cfg_fd == -1) {
+		return MOTOR_ERROR;
 	}
 
 	// Configure each node
-	err |= NMT_change_state(motor_cfg_handle, CANOPEN_BROADCAST_ID, NMT_Enter_PreOperational);
+	err |= NMT_change_state(motor_cfg_fd, CANOPEN_BROADCAST_ID, NMT_Enter_PreOperational);
 	if (err != 0) {
 		return MOTOR_ERROR;
 	}
@@ -155,54 +148,54 @@ int32_t motor_init(void) {
 
 
 void motor_close(void) {
-	socketcan_close(motor_pdo_handle);
-	socketcan_close(motor_cfg_handle);
+	socketcan_close(motor_pdo_fd);
+	socketcan_close(motor_cfg_fd);
 }
 
 
-int32_t motor_enable(void) {
-	int32_t err = 0;
-	err |= NMT_change_state(motor_cfg_handle, CANOPEN_BROADCAST_ID, NMT_Enter_PreOperational);
+int motor_enable(void) {
+	int err = 0;
+	err |= NMT_change_state(motor_cfg_fd, CANOPEN_BROADCAST_ID, NMT_Enter_PreOperational);
 	err |= epos_Controlword(MOTOR_EPOS_L_ID, Shutdown); // switch_on_disabled -> switch_on_enabled
 	err |= epos_Controlword(MOTOR_EPOS_R_ID, Shutdown);
 	err |= epos_Controlword(MOTOR_EPOS_L_ID, Switch_On_And_Enable_Operation);
 	err |= epos_Controlword(MOTOR_EPOS_R_ID, Switch_On_And_Enable_Operation);
 
 	// Open PDO-communication
-	err |= NMT_change_state(motor_cfg_handle, CANOPEN_BROADCAST_ID, NMT_Start_Node);
+	err |= NMT_change_state(motor_cfg_fd, CANOPEN_BROADCAST_ID, NMT_Start_Node);
 
 	return err;
 }
 
 
-int32_t motor_disable(void) {
+int motor_disable(void) {
 	int err = 0;
 
 	// Stop PDO-communication
-	err |= NMT_change_state(motor_cfg_handle, CANOPEN_BROADCAST_ID, NMT_Enter_PreOperational);
+	err |= NMT_change_state(motor_cfg_fd, CANOPEN_BROADCAST_ID, NMT_Enter_PreOperational);
 	err |= epos_Controlword(MOTOR_EPOS_L_ID, Disable_Voltage);
 	err |= epos_Controlword(MOTOR_EPOS_R_ID, Disable_Voltage);
-	err |= NMT_change_state(motor_cfg_handle, CANOPEN_BROADCAST_ID, NMT_Stop_Node);
+	err |= NMT_change_state(motor_cfg_fd, CANOPEN_BROADCAST_ID, NMT_Stop_Node);
 
 	return err;
 }
 
 
-int32_t motor_halt(void) {
-	int32_t err = 0;
+int motor_halt(void) {
+	int err = 0;
 
 	// Stop PDO-communication
-	err |= NMT_change_state(motor_cfg_handle, CANOPEN_BROADCAST_ID, NMT_Enter_PreOperational);
+	err |= NMT_change_state(motor_cfg_fd, CANOPEN_BROADCAST_ID, NMT_Enter_PreOperational);
 	err |= epos_Controlword(MOTOR_EPOS_L_ID, Quickstop);
 	err |= epos_Controlword(MOTOR_EPOS_R_ID, Quickstop);
-	err |= NMT_change_state(motor_cfg_handle, CANOPEN_BROADCAST_ID, NMT_Stop_Node);
+	err |= NMT_change_state(motor_cfg_fd, CANOPEN_BROADCAST_ID, NMT_Stop_Node);
 
 	return err;
 }
 
 
-int32_t motor_setmode(enum Motor_mode mode) {
-	int32_t err = 0;
+int motor_setmode(enum Motor_mode mode) {
+	int err = 0;
 	err |= epos_Modes_of_Operation(MOTOR_EPOS_L_ID, mode);
 	err |= epos_Modes_of_Operation(MOTOR_EPOS_R_ID, mode);
 	return err;
@@ -211,24 +204,24 @@ int32_t motor_setmode(enum Motor_mode mode) {
 
 
 /********* Utils: *********/
-int32_t motor_mmsec_to_rpm(int32_t mm_per_sec) {
+int motor_mmsec_to_rpm(int mm_per_sec) {
 	const double wheel_circumference = (2.0*MOTOR_WHEEL_RADIUS)*M_PI;
 	const double mm_per_rot = wheel_circumference/MOTOR_GEAR_RATIO;
-	int32_t mm_per_min = 60*mm_per_sec;
-	int32_t rpm = mm_per_min/mm_per_rot;  // [mm/min]/[mm/1] = [1/min]
+	int mm_per_min = 60*mm_per_sec;
+	int rpm = mm_per_min/mm_per_rot;  // [mm/min]/[mm/1] = [1/min]
 	return rpm;
 }
 
-int32_t motor_rpm_to_mmsec(int32_t rpm) {
+int motor_rpm_to_mmsec(int rpm) {
 	const double wheel_circumference = (2.0*MOTOR_WHEEL_RADIUS)*M_PI;
 	const double mm_per_rot = wheel_circumference/MOTOR_GEAR_RATIO;
-	int32_t mm_per_min = rpm*mm_per_rot;
+	int mm_per_min = rpm*mm_per_rot;
 	return mm_per_min/60.0;
 }
 
-int32_t motor_enc_to_mm(int32_t enc) {
+int motor_enc_to_mm(int enc) {
 	const double wheel_circumference = (2.0*MOTOR_WHEEL_RADIUS)*M_PI;
 	const double mm_per_rot = wheel_circumference/MOTOR_GEAR_RATIO;
-	int32_t mm = enc*mm_per_rot;
+	int mm = enc*mm_per_rot;
 	return mm;
 }
