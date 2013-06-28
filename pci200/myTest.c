@@ -11,7 +11,8 @@ int32_t main(void)
   int32_t  	  ID[11] = {11,0x101,0x102,0x103,0x104,
                   0x105,0x201,0x202,0x203,0x204,0x205};
   command 	  cmd;
-  int32_t         i; 
+  int32_t         i;
+  CMSG			msg; 
 	 
 // Open can 
   handle = initNTCAN(NTCAN_BAUD_1000, 0,
@@ -46,7 +47,19 @@ int32_t main(void)
   cmd.mode = l_close; 
   result = writeLimb(handle,&cmd);
   printf("result:%d\n",result); 
-  sleep(1); 
+  sleep(1);
+// Writing test two //
+	msg.id = 0x101;
+	msg.len = 2;
+	msg.data[0] = 0x01;
+	msg.data[1] = 0x00; 
+	printf("Control mode two\n");
+	result = writeNTCAN(handle,1,&msg);
+	if(result != 0)
+	{
+		printf("Error in Write\n");
+	}
+	 
 // Closing //   
   result = closeNTCAN(handle, ID);
   if(result != 0) {
