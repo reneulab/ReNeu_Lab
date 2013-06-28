@@ -1,13 +1,21 @@
-CC=gcc-4.4
+CC=gcc
+CFLAGS=-Wall
 LDFLAGS=-ldl
-OBJECTS=myTest.o ntcan.o canerror.o
+OBJ=myTest.o limb.o myCan.o $(CAN_OBJ) 
 EXECUTABLE=myTest
+CAN_OBJ=canerror.o ntcan.o
 
 all: $(EXECUTABLE)
 
-$(EXECUTABLE): $(OBJECTS)
+$(EXECUTABLE): $(OBJ) 
+	gcc -o myTest $(OBJ)
 
-myTest.o: ntcan.h
+myTest.o: limb.o myTest.c
 
+limb.o: myCan.o limb.c 
+
+myCan.o: $(CAN_OBJ) myCan.c 
+
+.PHONY:clean
 clean:
-	rm -f $(EXECUTABLE)
+	rm -f $(EXECUTABLE) myCan.o myTest.o limb.o 
