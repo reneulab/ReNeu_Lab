@@ -11,11 +11,10 @@ typedef enum {
 
 typedef enum {
 	thumb 	= 0x101,
-	index   = 0x105,
+	index   = 0x102,
 	middle	= 0x103,
-	ring 	= 0x102,
-	pinky 	= 0x104
- 
+	ring 	= 0x104,
+	pinky 	= 0x105 
 } finger;  
 
 typedef struct {

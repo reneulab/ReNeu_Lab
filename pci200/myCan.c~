@@ -192,7 +192,7 @@ int32_t errorCheck( int32_t command,
 	          printf("Error, RX timeout\n");
 		  return 2; break; }
          }
-         
+         udrate not set
 
    }
    printf("Unknown Error"); 

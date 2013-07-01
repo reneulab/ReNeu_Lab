@@ -17,7 +17,7 @@ int32_t writeLimb(NTCAN_HANDLE handle, command *myCmd)
   msg.data[1] = (uint8_t)((myCmd->mode) & 0x00FF);
   msg.data[0] = (uint8_t)0x00; 
   printf("Mode %d\n",msg.data[2]);
-  printf("Speed %d\n", msg.data[3] + (msg.data[2]<<8)); 
+  printf("Speed %d\n", msg.data[2] + (msg.data[3]<<8)); 
   result = writeNTCAN(handle,1, &msg);
   if(result != 0) 
   { 
