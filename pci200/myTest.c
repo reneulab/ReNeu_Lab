@@ -7,11 +7,11 @@
 int32_t main(void) 
 {
   NTCAN_HANDLE   handle;
-  int32_t	  result;
-  int32_t  	  ID[11] = {11,0x101,0x102,0x103,0x104,
+  int32_t	  	result;
+  int32_t  	  	ID[11] = {11,0x101,0x102,0x103,0x104,
                   0x105,0x201,0x202,0x203,0x204,0x205};
-  command 	  cmd;
-  int32_t         i;
+  command 	  	cmd;
+  int32_t     	i;
   CMSG			msg; 
 	 
 // Open can 

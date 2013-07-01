@@ -29,14 +29,14 @@
 #define MAX_TIMEOUT     50
 
 /****************************************************************/
-/*             Function: errorCheck 				*/
+/*             Function: errorCheck 									 */
 /*    command is one of the funtions in ntcan.h                 */
 /*    Notation for command is in #define                        */
 /*    Out: 1 if error, system should shutdown                   */
 /*         2 if error, wait and retry                           */
 /*   (only if command canWrite,canWrite_t,canSend               */
 /*     canSendEvent, canIdAdd,canIdDelete)                      */
-/*					                        */
+/*					                       					 				 */
 /*         0 if success :-)                                     */      
 /*         0xFF if unknown error                                */
 /****************************************************************/
@@ -318,5 +318,4 @@ int32_t writeNTCAN(NTCAN_HANDLE handle, int32_t len, CMSG *msg)
       { return 1; }
    printf("Message sent %d successful frames\n",
               len);
-   return 0; 
-}
+   return 0;
