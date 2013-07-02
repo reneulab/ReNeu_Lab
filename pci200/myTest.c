@@ -42,55 +42,87 @@ int32_t main(void)
     usleep(20000);
   }
 // Writing //
-for(i=1; i<=5; i++)
-  {
-  cmd.digit = ID[i];
-  cmd.speed = 500;
-  cmd.mode = l_close; 
-  result = writeLimb(handle,&cmd);
-  printf("result:%d\n",result); 
-  usleep(20000); 	
-  }
-  sleep(5);
-for(i=1; i<=5; i++)
-  {
-  cmd.digit = ID[i];
-  cmd.speed = 500;
-  cmd.mode = l_stop; 
-  result = writeLimb(handle,&cmd);
-  printf("result:%d\n",result); 
-  usleep(20000); 	
-  }
-  sleep(5);
-// Writing //
-/*for(i=5; i>=1; i--)
-  {
-  cmd.digit = ID[i];
-  cmd.speed = 650;
-  cmd.mode = l_open; 
-  result = writeLimb(handle,&cmd);
-  printf("result:%d\n",result); 
-  cmd.digit = pinky;
-  cmd.speed = 600;
-  cmd.mode = l_close; 
-  result = writeLimb(handle,&cmd);
-  printf("result:%d\n",result); 
-  cmd.digit = pinky;
-  cmd.speed = 600;
-  cmd.mode = l_close; 
-  result = writeLimb(handle,&cmd);
-  printf("result:%d\n",result); 
-  usleep(20000);
-  } */
+	for(i=1; i<=5; i++)
+  	{
+  		cmd.digit = ID[i];
+  		cmd.speed = 500;
+  		cmd.mode = l_close; 
+  		result = writeLimb(handle,&cmd);
+  		printf("result:%d\n",result);
+		usleep(20000); 
+ 		result = readLimb(handle, &cmd);
+    	if(result != 0) 
+    	{ 
+      	result = closeNTCAN(handle, ID); 
+      	if(result != 0) 
+			{
+        		printf("closeNTCAN error \n");
+        		return 1; 
+      	}
+      	return 1;
+    	}
+    	printf("Digit:%x Mode:%d\n", cmd.digit,cmd.mode);
+    	usleep(20000); 
+  		sleep(1);	
+	}
+  	sleep(2);
+	for(i=1; i<=5; i++)
+  	{
+  		cmd.digit = ID[i];
+  		cmd.speed = 500;
+  		cmd.mode = l_stop; 
+  		result = writeLimb(handle,&cmd);
+  		printf("result:%d\n",result); 
+    	usleep(20000);
+  		result = readLimb(handle, &cmd);
+    	if(result != 0) 
+    	{ 
+      	result = closeNTCAN(handle, ID); 
+      	if(result != 0) 
+			{
+       		printf("closeNTCAN error \n");
+        		return 1; 
+      	}
+      	return 1;
+    	}
+    	printf("Digit:%x Mode:%d\n", cmd.digit,cmd.mode);
+		usleep(20000);
+  		sleep(1); 	
+  	}
+  	sleep(2);
+	for(i=5; i>=1; i--)
+  	{
+  		cmd.digit = ID[i];
+  		cmd.speed = 650;
+  		cmd.mode = l_open; 
+  		result = writeLimb(handle,&cmd);
+  		printf("result:%d\n",result);
+		usleep(20000); 
+		result = readLimb(handle, &cmd);
+    	if(result != 0) 
+    	{ 
+      	result = closeNTCAN(handle, ID); 
+      	if(result != 0) 
+			{
+       		printf("closeNTCAN error \n");
+        		return 1; 
+      	}
+      	return 1;
+    	}
+    	printf("Digit:%x Mode:%d\n", cmd.digit,cmd.mode);
+		usleep(20000);
+  		sleep(1);
+  	} 
 	 
 // Closing //   
-  result = closeNTCAN(handle, ID);
-  if(result != 0) {
-    printf("closeNTCAN error \n"); 
-    return 1; 
-  }
-  printf("Successful uses :]\n"); 
-  return 0; 
+	result = closeNTCAN(handle, ID);
+  	if(result != 0) 
+	{
+   	printf("closeNTCAN error \n"); 
+    	return 1; 
+  	}
+  	printf("Successful uses :]\n"); 
+  	return 0; 
 }
 
 

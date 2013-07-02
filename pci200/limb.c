@@ -38,13 +38,12 @@ int32_t writeLimb(NTCAN_HANDLE handle, command *myCmd)
 int32_t readLimb(NTCAN_HANDLE handle, command *myCmd)
 {
 	CMSG msg;
-	int32_t id; 
   	int32_t result;
 
   	printf("IN READ\n"); 
   	msg.id = myCmd->digit + 0x100; 
   	msg.len = 4;   
-  	result = readNTCAN(handle,&msg,5);
+  	result = readNTCAN(handle,&msg,1);
   	myCmd->mode = msg.data[1] | (msg.data[0]<<8);
   	myCmd->speed = msg.data[3] | (msg.data[2]<<8);
   	printf("Mode: %d\n", myCmd->mode); 
