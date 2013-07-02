@@ -4,7 +4,12 @@
 #include <stdio.h>
 #include "limb.h"
 #include "myCan.h" 
-
+#define MESSAGE_LEN 5
+// 1: 5,4,3,2,1
+// 2: 5,3,1,4,2
+// 3: 5,2,4,1,3
+// 4: 5,1,2,3,4
+// 5: 5,5,5,5,5
 /****************************************************************/
 /****************************************************************/
 int32_t writeLimb(NTCAN_HANDLE handle, command *myCmd) 
@@ -37,16 +42,17 @@ int32_t writeLimb(NTCAN_HANDLE handle, command *myCmd)
 /***************************************************************/
 int32_t readLimb(NTCAN_HANDLE handle, command *myCmd)
 {
-	CMSG msg;
-  	int32_t result;
+	CMSG msg[MESSAGE_LEN];
+  	int32_t result,i;
 
-  	printf("IN READ\n"); 
-  	msg.id = myCmd->digit + 0x100; 
-  	msg.len = 4;   
-  	result = readNTCAN(handle,&msg,1);
-  	myCmd->mode = msg.data[1] | (msg.data[0]<<8);
-  	myCmd->speed = msg.data[3] | (msg.data[2]<<8);
-  	printf("Mode: %d\n", myCmd->mode); 
+  	printf("IN READ\n");
+	for(i=0;i<MESSAGE_LEN;i++){ 
+  	msg[i].id = myCmd->digit; 
+  	msg[i].len = 8;  } 
+  	result = readNTCAN(handle,msg,MESSAGE_LEN);
+  	//myCmd->mode = msg.data[1] | (msg.data[0]<<8);
+  	//myCmd->speed = msg.data[3] | (msg.data[2]<<8);
+  	//printf("Mode: %d\n", myCmd->mode); 
   	if(result != 0)
   		{ return 1; }
   	return 0;

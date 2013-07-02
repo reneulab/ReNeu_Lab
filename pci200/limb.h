@@ -10,12 +10,16 @@ typedef enum {
 } handMode;
 
 typedef enum {
-	thumb 	= 0x101,
-	index   = 0x105,
-	middle	= 0x103,
-	ring 	= 0x102,
-	pinky 	= 0x104
- 
+	thumb_W		= 0x101,
+	thumb_R		= 0x201,
+	index_W	 	= 0x105,
+	index_R		= 0x205,
+	middle_W	= 0x103,
+	middle_R	= 0x203,
+	ring_W 		= 0x102,
+	ring_R		= 0x202,
+	pinky_W 	= 0x104,
+	pinky_R		= 0x204
 } finger;  
 
 typedef struct {

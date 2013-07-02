@@ -1,0 +1,7 @@
+cd /dev
+sudo mknod --mode=a+rw can0 c 54 0
+cd ~/Documents/Rachel/pci200
+sudo modprobe -r plx_pci
+sudo modprobe -r sja1000
+sudo modprobe -r can_dev
+sudo modprobe -i esdcan-pci200
