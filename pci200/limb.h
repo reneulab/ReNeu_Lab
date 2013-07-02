@@ -24,7 +24,11 @@ typedef struct {
 	uint32_t speed;
 } command;    
 	
-
+typedef struct {
+	int32_t vel;
+	int32_t time;
+	int32_t dist; 
+} movement;
 
 
  
@@ -52,7 +56,7 @@ int32_t readLimb(NTCAN_HANDLE handle, command *myCmd);
 /*				 	digit to open												*/
 /*			Out: 	0 if success, 1 if error 								*/
 /***************************************************************/ 
-int32_t openLimb(NTCAN_HANDLE handle, finger myDigit);
+int32_t openLimb(NTCAN_HANDLE handle, finger myDigit, int32_t spd);
 
  
 /***************************************************************/
@@ -61,7 +65,7 @@ int32_t openLimb(NTCAN_HANDLE handle, finger myDigit);
 /*					digit to close												*/
 /*			Out: 	0 if success, 1 if error 								*/
 /***************************************************************/ 
-int32_t closeLimb(NTCAN_HANDLE handle, finger myDigit);
+int32_t closeLimb(NTCAN_HANDLE handle, finger myDigit, int32_t spd);
 
-
+int32_t moveLimb_T(NTCAN_HANDLE handle, finger myDigit, handMode myMode, movement *move); 
 

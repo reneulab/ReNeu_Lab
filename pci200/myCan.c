@@ -283,27 +283,31 @@ int32_t readNTCAN(NTCAN_HANDLE handle, CMSG *msg, int32_t len)
    int32_t			i;
    int32_t 			timeout=0; 
 /* Reading Object of NTCAN device */  
-      do { 
-			result = canRead(handle,msg, &len, NULL); 
-         timeout++;
+	do {
+		printf("ID IN READ: %x\n",msg->id);  
+		result = canRead(handle,msg, &len, NULL); 
+      printf("ID IN READ: %x\n",msg->id);
+		timeout++;
 /* If timeout error is recieved repeatly then read is aborted */
-         if(timeout > MAX_TIMEOUT) {
-            result = canIoctl(handle, NTCAN_IOCTL_ABORT_RX, NULL);
-            if(errorCheck(CAN_IO_CTL,result != 0))
-              { return 1; } 									// error check
+      if(timeout > MAX_TIMEOUT) 
+			{
+      	result = canIoctl(handle, NTCAN_IOCTL_ABORT_RX, NULL);
+         if(errorCheck(CAN_IO_CTL,result != 0))
+         	{ return 1; } 									// error check
             printf("Repeated Timeout, read aborted\n");
-            return 2; }
+            return 2; 
+			}
       } while(errorCheck(CAN_READ,result) == 2); 
-      if(errorCheck(CAN_READ,result) != 0)
-         { return 1; }  										// error check
+	if(errorCheck(CAN_READ,result) != 0)
+		{ return 1; }  										// error check
 /* Printing read object of NTCAN device to screen */
-      printf("readNTCAN() successfull\n") ;
-      printf("ID of NTCAN device: %x\n", msg->id);
-      printf("Length of message recieved: %d\n", (len & 0x0F) );
-      for(i=0;i<(msg->len);i++) {
-         printf("Byte %d of recieved message: %d\n", i, 
-                 msg->data[i]);
-      } 
+	printf("readNTCAN() successfull\n") ;
+	printf("ID of NTCAN device: %x\n", msg->id);
+	printf("Length of message recieved: %d\n", (len & 0x0F) );
+   for(i=0;i<(msg->len);i++) 
+	{
+		printf("Byte %d of recieved message: %d\n", i, msg->data[i]);
+   } 
    return 0; 
  }
 
