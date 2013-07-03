@@ -123,6 +123,41 @@ int32_t moveLimb_T(NTCAN_HANDLE handle, finger myDigit, handMode myMode, movemen
 		printf("Error invaild mode"); 
 		return 1;
 	}
+	
+	if(move->angle == NULL) 
+	{
+// move based on time and speed
+		myCmd.digit = myDigit;
+		myCmd.mode = myMode;
+		myCmd.speed = move->vel;
+		if(myCmd.speed == NULL)
+			{ myCmd.speed = 400; }
+		result = writeLimb(handle, &myCmd);
+		if(result != 0) 
+		{ 
+			myCmd.mode = l_stop;
+			writeLimb(handle, &myCmd);
+		 	return 1; 
+		}
+		usleep(move->time);
+		myCmd.mode = l_stop;
+		result = writeLimb(handle, &myCmd);  
+		if(result != 0) 
+			{ return 1; }
+		return 0;
+	}
+	else if( move->time == NULL)
+	{
+// move a distance
+		myCmd.digit = myDigit;
+		myCmd.mode = myMode;
+		myCmd.speed = move->vel;
+		if(myCmd.speed == NULL)
+			{ myCmd.speed = 400; }
+		
+	}
+
+
 	myCmd.digit = myDigit;
 	myCmd.mode = myMode; 
 	myCmd.speed = move->vel;

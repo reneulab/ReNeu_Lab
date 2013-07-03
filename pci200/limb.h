@@ -31,7 +31,7 @@ typedef struct {
 typedef struct {
 	int32_t vel;
 	int32_t time;
-	int32_t dist; 
+	int32_t angle; 
 } movement;
 
 
