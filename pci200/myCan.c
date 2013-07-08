@@ -214,13 +214,13 @@ int32_t initNTCAN(uint32_t baud,  uint32_t flags,
                     txTime,rxTime,&handle);
    if(errorCheck(CAN_OPEN,result) != 0)  			// Error check
       { return 0xFFFF; }								// returns 1 if error
-   printf("canOpen() success\n");
+//   printf("canOpen() success\n");
 /* Setting baudrate */   
    result = canSetBaudrate(handle,baud);   		// sets baudrate
    if(errorCheck(CAN_SET_BAUDRATE,result) != 0) // Error check
       { return 0xFFFF; }								// returns 1 if error
    result = canGetBaudrate(handle,&baud);  		// Reads buadrate
-   printf("canSetBaudrate() success. Baudrate is %d\n",baud);
+//   printf("canSetBaudrate() success. Baudrate is %d\n",baud);
 /* Adding an ID */
 	for(i=1; i<ID[0]; i++) {
       do  { result = canIdAdd(handle,ID[i]); 	// Adds ID to handle
@@ -231,14 +231,14 @@ int32_t initNTCAN(uint32_t baud,  uint32_t flags,
           } while( errorCheck(CAN_ID_ADD,result) == 2); 
       if(errorCheck(CAN_ID_ADD,result) != 0) 	// error check
          { return 0xFFFF; }
-   printf("canIdAdd() successful\n"); 
+//   printf("canIdAdd() successful\n"); 
    }
    printf("Initializing sucessfull\n");
 /* Flushing FIFO buffer */
    result = canIoctl(handle,NTCAN_IOCTL_FLUSH_RX_FIFO,NULL);   
    if(errorCheck(CAN_IO_CTL,result) != 0) 		// flushing FIFO
       { return 0xFFFF; } 								// error check
-   printf("System flushed, device ready to use\n");
+//   printf("System flushed, device ready to use\n");
    return handle; // returns handle for NTCAN device 
 }
 
@@ -284,12 +284,7 @@ int32_t readNTCAN(NTCAN_HANDLE handle, CMSG *msg, int32_t len)
    int32_t 			timeout=0; 
 /* Reading Object of NTCAN device */  
 	do {
-		printf("LEN IN READ: %x\n",msg->len); 
-		printf("ID IN READ: %x\n",msg->id);  
-		msg->id = 0x00;
-      	printf("ID IN READ: %x\n",msg->id);
 		result = canRead(handle,msg, &len, NULL); 
-      	printf("ID IN READ: %x\n",msg->id);
 		timeout++;
 /* If timeout error is recieved repeatly then read is aborted */
       if(timeout > MAX_TIMEOUT) 

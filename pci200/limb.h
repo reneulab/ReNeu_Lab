@@ -8,24 +8,12 @@ typedef enum {
 	s_close = 4,
 	s_open 	= 3, 
 } handMode;
-
-typedef enum {
-	thumb_W		= 0x101,
-	thumb_R		= 0x201,
-	index_W	 	= 0x105,
-	index_R		= 0x205,
-	middle_W	= 0x103,
-	middle_R	= 0x203,
-	ring_W 		= 0x102,
-	ring_R		= 0x202,
-	pinky_W 	= 0x104,
-	pinky_R		= 0x204
-} finger;  
-
+	
 typedef struct {
- 	finger	digit;
 	handMode mode; 
 	uint32_t speed;
+ 	int32_t	digit_w;
+	int32_t digit_r;
 } command;    
 	
 typedef struct {
@@ -60,7 +48,7 @@ int32_t readLimb(NTCAN_HANDLE handle, command *myCmd);
 /*				 	digit to open												*/
 /*			Out: 	0 if success, 1 if error 								*/
 /***************************************************************/ 
-int32_t openLimb(NTCAN_HANDLE handle, finger myDigit, int32_t spd);
+int32_t openLimb(NTCAN_HANDLE handle, int32_t myDigit[], int32_t spd);
 
  
 /***************************************************************/
@@ -69,7 +57,7 @@ int32_t openLimb(NTCAN_HANDLE handle, finger myDigit, int32_t spd);
 /*					digit to close												*/
 /*			Out: 	0 if success, 1 if error 								*/
 /***************************************************************/ 
-int32_t closeLimb(NTCAN_HANDLE handle, finger myDigit, int32_t spd);
+int32_t closeLimb(NTCAN_HANDLE handle, int32_t myDigit[], int32_t spd);
 
-int32_t moveLimb_T(NTCAN_HANDLE handle, finger myDigit, handMode myMode, movement *move); 
+int32_t moveLimb_T(NTCAN_HANDLE handle, int32_t myDigit, handMode myMode, movement *move); 
 
