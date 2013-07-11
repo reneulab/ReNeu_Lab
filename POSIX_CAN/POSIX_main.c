@@ -106,7 +106,7 @@ int32_t main(void)
       	printf("Opening a session...\n");
       	NiFpga_MergeStatus(&status, NiFpga_Open(Bitfile,
                                               NiFpga_FPGA_Signature,
-                                              "rio://146.6.84.233/RIO0",
+                                              "rio://146.6.84.41/RIO0",
                                               NiFpga_OpenAttribute_NoRun,
                                               &(mySwitch.session)));
 		printf("Session Status: %i\n",status);
