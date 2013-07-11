@@ -1,0 +1,1 @@
+Code that uses the CAN-pci200 to interface with a research model of the i-limb hand from biotech. The main files uses library ntcan provided for the pci200 and library myCan that I wrote for the can protocol. It also uses the limb library that I wrote to switch between the different hand modes that the i-limb hand has.  

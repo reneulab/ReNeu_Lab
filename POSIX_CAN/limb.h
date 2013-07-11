@@ -31,6 +31,12 @@ typedef struct {
 	int32_t angle; 
 } movement;
 
+typedef struct {
+	int32_t 	 time;
+	finger 		 digit;
+	command		 cmd;
+	NTCAN_HANDLE handle;  
+} arg; 
 
 NTCAN_HANDLE initLimb(finger myDigit, command *myCmd); 
 int32_t closeLimb(NTCAN_HANDLE handle, finger myDigit); 
