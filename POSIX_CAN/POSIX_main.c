@@ -2,99 +2,113 @@
 #include "limb.h"
 #include "myCan.h"
 #include <stdio.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
-#include "NiFpga_ButtonFPGA.h"
-#include "NiFpga.h"
+
+
+#define WAIT 	20000
+#define SPEED 	690
+int32_t count;
 
 typedef struct {
 	NiFpga_Session session;
-	NiFpga_Bool DIO0;
-	NiFpga_Bool DIO1;
-	NiFpga_Bool DIO2;
-	NiFpga_Bool DIO3;
-	NiFpga_Bool DIO4;
+	NiFpga_Bool DIO[5];
+	int32_t	Analog[5]; 
 } niData; 
 
-void* niThread(void *niSwitch);
-
-void* myThread(void *arg1); 
-
-void* niThread(void *mySwitch)
+void catch_signal(int sig)
 {
-	 
-   	NiFpga_ReadBool((*(niData*)mySwitch).session,NiFpga_thumb, &((*(niData*)mySwitch).DIO0));
-	NiFpga_ReadBool((*(niData*)mySwitch).session,NiFpga_index, &((*(niData*)mySwitch).DIO1));
-	NiFpga_ReadBool((*(niData*)mySwitch).session,NiFpga_middle,&((*(niData*)mySwitch).DIO2));
-	NiFpga_ReadBool((*(niData*)mySwitch).session,NiFpga_ring,  &((*(niData*)mySwitch).DIO3));
-	NiFpga_ReadBool((*(niData*)mySwitch).session,NiFpga_pinkie,&((*(niData*)mySwitch).DIO4));
-   
-/*	(((niData*)mySwitch)->DIO0) = 1; 
-	(((niData*)mySwitch)->DIO1) = 1; 
-	(((niData*)mySwitch)->DIO2) = 1; 
-	(((niData*)mySwitch)->DIO3) = 1; 
-	(((niData*)mySwitch)->DIO4) = 1; */
-	pthread_exit(NULL);
-
+	printf("Quitting\n");
+	count = 1;
 }
 
-void* myThread(void *arg1) 
+void* flexThread(void *myNI)
+{
+   	NiFpga_ReadI32((*(niData*)myNI).session,NiFpga_thumb_flex,  &((*(niData*)myNI).Analog[0]));
+   	NiFpga_ReadI32((*(niData*)myNI).session,NiFpga_index_flex,  &((*(niData*)myNI).Analog[1]));
+   	NiFpga_ReadI32((*(niData*)myNI).session,NiFpga_middle_flex, &((*(niData*)myNI).Analog[2]));
+   	NiFpga_ReadI32((*(niData*)myNI).session,NiFpga_ring_flex,   &((*(niData*)myNI).Analog[3]));
+   	NiFpga_ReadI32((*(niData*)myNI).session,NiFpga_pinkie_flex, &((*(niData*)myNI).Analog[4]));
+	
+	pthread_exit(NULL);
+}
+
+void* niThread(void *myNI)
+{
+   	NiFpga_ReadBool((*(niData*)myNI).session,NiFpga_thumb_switch, &((*(niData*)myNI).DIO[0]));
+	NiFpga_ReadBool((*(niData*)myNI).session,NiFpga_index_switch, &((*(niData*)myNI).DIO[1]));
+	NiFpga_ReadBool((*(niData*)myNI).session,NiFpga_middle_switch,&((*(niData*)myNI).DIO[2]));
+	NiFpga_ReadBool((*(niData*)myNI).session,NiFpga_ring_switch,  &((*(niData*)myNI).DIO[3]));
+	NiFpga_ReadBool((*(niData*)myNI).session,NiFpga_pinkie_switch,&((*(niData*)myNI).DIO[4]));
+   
+	pthread_exit(NULL);
+}
+
+void* limbThread(void *arg1) 
 {
   	int32_t		result;
 	arg 		myArg;
+	handMode	myCmd;
 
 	myArg = (*((arg *) arg1));
-	result = writeLimb(myArg.handle,&(myArg.cmd));
-	usleep(myArg.time);
+	myCmd = myArg.cmd.mode; 
 
 	myArg.cmd.mode = l_stop;
 	result = writeLimb(myArg.handle,&(myArg.cmd));
-	usleep(20000);
+	usleep(20000);	
 
-// Closing //  
+	myArg.cmd.mode = myCmd;
+	result = writeLimb(myArg.handle,&(myArg.cmd));
+	usleep(myArg.time);
+
 	pthread_exit(NULL);  
-  	return 0; 
 }
 
 
 int32_t main(void)
 {
-	pthread_t* 	thumb_T,index_T,middle_T,ring_T,pinkie_T,switch_T;
-	arg 	  	myThumb,myIndex,myMiddle,myRing,myPinkie;
-	int32_t 	ret0,ret1,ret2,ret3,ret4,ret5;
-	niData 		mySwitch; 
+	pthread_t*  digit_T[5]; 
+	pthread_t*	flex_T;
+	pthread_t*  switch_T;	
+	arg 	  	myDigit[5]; 
+	int32_t 	ret[5]; 
+	int32_t		ret0;
+	niData 		myNI; 
 	int32_t		i=0;
+	handMode 	lastCmd[5]; 
+
+	signal(SIGINT,catch_signal);
+	signal(SIGTERM,catch_signal);
 /* Init thread pointers*/
-	thumb_T  = malloc(sizeof(pthread_t)); 
-	index_T  = malloc(sizeof(pthread_t)); 
-	middle_T  = malloc(sizeof(pthread_t)); 
-	ring_T  = malloc(sizeof(pthread_t)); 
-	pinkie_T  = malloc(sizeof(pthread_t)); 
+	for(i=0;i<5;i++)
+		{ digit_T[i] = malloc(sizeof(pthread_t)); }
 	switch_T  = malloc(sizeof(pthread_t)); 
+	flex_T[i] = malloc(sizeof(pthread_t)); 
 /* Init  hand */
-	myThumb.handle = initLimb(thumb, &myThumb.cmd);
-	if(myThumb.handle == 0xFFFF) 
+	myDigit[0].handle = initLimb(thumb, &myDigit[0].cmd);
+	if(myDigit[0].handle == 0xFFFF) 
 		{ printf("Error in thumb init\n"); return 1; } 
 	usleep(20000);
 
-	myIndex.handle = initLimb(index, &myIndex.cmd);
-	if(myIndex.handle == 0xFFFF) 
+	myDigit[1].handle = initLimb(index, &myDigit[1].cmd);
+	if(myDigit[1].handle == 0xFFFF) 
 		{ printf("Error in index init\n"); return 1; } 
 	usleep(20000);
 
-	myMiddle.handle = initLimb(middle, &myMiddle.cmd);
-	if(myMiddle.handle == 0xFFFF) 
+	myDigit[2].handle = initLimb(middle, &myDigit[2].cmd);
+	if(myDigit[2].handle == 0xFFFF) 
 		{ printf("Error in middle init\n"); return 1; } 
 	usleep(20000);
 
-	myRing.handle = initLimb(ring, &myRing.cmd);
-	if(myRing.handle == 0xFFFF) 
+	myDigit[3].handle = initLimb(ring, &myDigit[3].cmd);
+	if(myDigit[3].handle == 0xFFFF) 
 		{ printf("Error in ring init\n"); return 1; } 
 	usleep(20000);
 
-	myPinkie.handle = initLimb(pinkie, &myPinkie.cmd);
-	if(myPinkie.handle == 0xFFFF) 
+	myDigit[4].handle = initLimb(pinkie, &myDigit[4].cmd);
+	if(myDigit[4].handle == 0xFFFF) 
 		{ printf("Error in pinkie init\n"); return 1; } 
 	usleep(20000);
 /* Init FPGA */
@@ -105,124 +119,92 @@ int32_t main(void)
 /* opens a session, downloads the bitstream, and runs the FPGA */
       	printf("Opening a session...\n");
       	NiFpga_MergeStatus(&status, NiFpga_Open(Bitfile,
-                                              NiFpga_FPGA_Signature,
-                                              "rio://146.6.84.233/RIO0",
+                                              NiFpga_Signature,
+                                              "rio://146.6.84.41/RIO0",
                                               NiFpga_OpenAttribute_NoRun,
-                                              &(mySwitch.session)));
+                                              &(myNI.session)));
 		printf("Session Status: %i\n",status);
       	if (NiFpga_IsNotError(status))
       	{ /* run the FPGA application */
          	printf("Running the FPGA...\n");
-         	NiFpga_MergeStatus(&status, NiFpga_Run(mySwitch.session, 0));
+         	NiFpga_MergeStatus(&status, NiFpga_Run(myNI.session, 0));
 
 /* Setting values */ 
-	mySwitch.DIO0 = 0;  
-	mySwitch.DIO1 = 0;  
-	mySwitch.DIO2 = 0;  
-	mySwitch.DIO3 = 0;  
-	mySwitch.DIO4 = 0;
-  
-	myThumb.digit = thumb;
-	myThumb.time  = 100000;
-	myThumb.cmd.speed = 550;
-	myThumb.cmd.mode = l_stop;
-	
-	myIndex.digit = index;
-	myIndex.time  = 100000;
-	myIndex.cmd.speed = 550;
-	myIndex.cmd.mode = l_stop;
-	
-	myMiddle.digit = middle;
-	myMiddle.time  = 100000;
-	myMiddle.cmd.speed = 550;
-	myMiddle.cmd.mode = l_stop;
-	
-	myRing.digit = ring;
-	myRing.time  = 100000;
-	myRing.cmd.speed = 550;
-	myRing.cmd.mode = l_stop;
-	
-	myPinkie.digit = pinkie;
-	myPinkie.time  = 100000;
-	myPinkie.cmd.speed = 550;
-	myPinkie.cmd.mode = l_stop;
-
-	printf(" About to start\n"); 	
-/* intresting part */
-	for(i=0;i<500;i++)
+	count = 0; 
+/* Init all DIO pins to 1 (open switch) and Analog to 0 */	
+	for(i=0;i<5;i++)
 	{
-	printf("Loop: %d\n",i);	
-	ret0 = pthread_create( &switch_T,  NULL, niThread, &mySwitch);
-	pthread_join(switch_T,NULL);
-	printf("Thread mySwitch returns: %d\n",ret1);
- 
-    if(mySwitch.DIO0 == 0)
-		{ myThumb.cmd.mode = l_close; } 
-    else if(mySwitch.DIO0 == 1)
-		{ myThumb.cmd.mode = l_open; }
-
-	if(mySwitch.DIO1 == 0)
-		{ myIndex.cmd.mode = l_close; }
-	else { myIndex.cmd.mode = l_open; }
-    
-	if(mySwitch.DIO2 == 0)
-		{ myMiddle.cmd.mode = l_close; }
-	else { myMiddle.cmd.mode = l_open; }
-    
-	if(mySwitch.DIO3 == 0)
-		{ myRing.cmd.mode = l_close; }
-	else { myRing.cmd.mode = l_open; }
-    
-	if(mySwitch.DIO4 == 0)
-		{ myPinkie.cmd.mode = l_close; }
-	else { myPinkie.cmd.mode = l_open; }
-
-	ret1 = pthread_create( &thumb_T,  NULL, myThread, &myThumb);
-	ret2 = pthread_create( &index_T,  NULL, myThread, &myIndex);
-	ret3 = pthread_create( &middle_T, NULL, myThread, &myMiddle);
-	ret4 = pthread_create( &ring_T,   NULL, myThread, &myRing);
-	ret5 = pthread_create( &pinkie_T, NULL, myThread, &myPinkie);
-	pthread_join(thumb_T,NULL);
-	pthread_join(index_T,NULL);
-	pthread_join(middle_T,NULL);
-	pthread_join(ring_T,NULL);
-	pthread_join(pinkie_T,NULL);
-	printf("DIO0: %d\n",mySwitch.DIO0); 
-	printf("DIO1: %d\n",mySwitch.DIO1); 
-	printf("DIO2: %d\n",mySwitch.DIO2); 
-	printf("DIO3: %d\n",mySwitch.DIO3); 
-	printf("DIO4: %d\n",mySwitch.DIO4);
+		myNI.DIO[i] = 1;
+		myNI.Analog[i] = 0;
+	}  
+/* Init all Args to correct digit with speed and wait time */  
+	for(i=0;i<5;i++)
+	{
+		myDigit[i].time = WAIT;
+		myDigit[i].cmd.speed = SPEED;
+		myDigit[i].cmd.mode = l_stop;
+		lastCmd[i] = l_stop; 
 	}
 
-    usleep(40000); 
-	myThumb.cmd.mode = l_stop;	
-	myIndex.cmd.mode = l_stop;	
-	myMiddle.cmd.mode = l_stop;	
-	myRing.cmd.mode = l_stop;	
-	myPinkie.cmd.mode = l_stop;	
-	ret1 = pthread_create( &thumb_T,  NULL, myThread, &myThumb);
-	ret2 = pthread_create( &index_T,  NULL, myThread, &myIndex);
-	ret3 = pthread_create( &middle_T, NULL, myThread, &myMiddle);
-	ret4 = pthread_create( &ring_T,   NULL, myThread, &myRing);
-	ret5 = pthread_create( &pinkie_T, NULL, myThread, &myPinkie);
-	pthread_join(thumb_T,NULL);
-	pthread_join(index_T,NULL);
-	pthread_join(middle_T,NULL);
-	pthread_join(ring_T,NULL);
-	pthread_join(pinkie_T,NULL);
-	printf("Thread 1 returns: %d\n",ret1); 
-	printf("Thread 2 returns: %d\n",ret2); 
-	printf("Thread 3 returns: %d\n",ret3); 
-	printf("Thread 4 returns: %d\n",ret4); 
-	printf("Thread 5 returns: %d\n",ret5);
+	myDigit[0].digit = thumb;
+	myDigit[1].digit = index;
+	myDigit[2].digit = middle;
+	myDigit[3].digit = ring;
+	myDigit[4].digit = pinkie;
 
+	printf("Starting... hit CTR-C to exit\n"); 	
+/* intresting part */
+	while(count==0)
+	{
+/* Read all switch inputs in one thread */	
+		ret0 = pthread_create(&switch_T,  NULL, niThread, &myNI);
+		pthread_join(switch_T,NULL);
+/* runs finger if state of switch changed, uses up to 5 threads */ 		
+		for(i=0;i<5;i++)
+		{
+			if(myNI.DIO[i] == 0)
+				{ myDigit[i].cmd.mode = l_close; }
+			else if(myNI.DIO[i] == 1)
+				{ myDigit[i].cmd.mode = l_open; }
+		
+		
+			if(lastCmd[i] != myDigit[i].cmd.mode)
+				{ ret[i] = pthread_create( &(digit_T[i]), NULL, limbThread, &(myDigit[i]));}
+		}
+/* reads all Flex sensor inputs while limb thread continue to run */
+		ret0 = pthread_create(&flex_T, NULL, flexThread, &myNI);
+		pthread_join(flex_T,NULL);
+/* Prints out values read from flex sensors and ends all current threads */
+		for(i=0;i<5;i++)
+		{
+			if(lastCmd[i] != myDigit[i].cmd.mode)
+			{ 
+				pthread_join(digit_T[i],NULL); 
+				printf("Digit %d output is %d\n", i, myNI.Analog[i]);
+			}
+			lastCmd[i] = myDigit[i].cmd.mode; 
+		}
+/* Loops back to intresting part until ctr-c is pressed */	
+	}
+
+/* Stopping hand */
+    usleep(40000);
+	printf("Stopping Hand\n");
+	for(i=0;i<5;i++)
+	{
+		myDigit[i].cmd.mode = l_stop; 	 
+	    ret[i] = pthread_create( &(digit_T[i]),  NULL, limbThread, &(myDigit[i]));
+		pthread_join(digit_T[i],NULL);
+		usleep(40000);
+	}
+	usleep(500000);
 /* Closing NI FPGA */
 		printf("Stopping the FPGA...\n");
-	    NiFpga_MergeStatus(&status, NiFpga_WriteU32(mySwitch.session, 
+	    NiFpga_MergeStatus(&status, NiFpga_WriteU32(myNI.session, 
 						NiFpga_stop,1));
 		/* close the session now that we're done */
 	    printf("Closing the session...\n");
-	    NiFpga_MergeStatus(&status, NiFpga_Close(mySwitch.session, 0));
+	    NiFpga_MergeStatus(&status, NiFpga_Close(myNI.session, 0));
 	    }
       /* must be called after all other calls */
       printf("Finalizing...\n");
@@ -237,12 +219,8 @@ int32_t main(void)
    }
    return status;
 /* Closing limb hand */
-	closeLimb(myThumb.handle,myThumb.digit); 
-	closeLimb(myIndex.handle,myIndex.digit); 
-	closeLimb(myMiddle.handle,myMiddle.digit); 
-	closeLimb(myRing.handle,myRing.digit); 
-	
-	closeLimb(myPinkie.handle,myPinkie.digit); 
+	for(i=0;i<5;i++)
+		{ closeLimb(myDigit[i].handle,myDigit[i].digit);}
 	printf("Successful uses :]\n");
 	pthread_exit(NULL);  
 }

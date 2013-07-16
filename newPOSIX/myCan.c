@@ -299,16 +299,16 @@ int32_t readNTCAN(NTCAN_HANDLE handle, CMSG *msg, int32_t len)
 	if(errorCheck(CAN_READ,result) != 0)
 		{ return 1; }  										// error check
 /* Printing read object of NTCAN device to screen */
-	printf("readNTCAN() successfull\n") ;
-	printf("Length of message recieved: %d\n", (len & 0x0F) );
-	for(j=0;j<len;j++)
-	{
-		printf("ID of NTCAN device: %x\n", msg->id); 
-   		for(i=0;i<(msg->len);i++) 
-		{
-			printf("Byte %d of recieved message: %d\n", i, msg->data[i]);
-   		}  
- 	}
+//	printf("readNTCAN() successfull\n") ;
+//	printf("Length of message recieved: %d\n", (len & 0x0F) );
+//	for(j=0;j<len;j++)
+//	{
+//		printf("ID of NTCAN device: %x\n", msg->id); 
+//   		for(i=0;i<(msg->len);i++) 
+//		{
+//			printf("Byte %d of recieved message: %d\n", i, msg->data[i]);
+//   		}  
+// 	}
 	return 0; 
 }
 
@@ -320,7 +320,7 @@ int32_t writeNTCAN(NTCAN_HANDLE handle, int32_t len, CMSG *msg)
    len |= len + (RTR_ENABLE<<4);
    result = canWrite(handle, msg, &len, NULL); 
    if(errorCheck(CAN_WRITE,result) != 0)
-      { return 1; }
+      { return 1; } 
 //   printf("Message sent %d successful frames\n",len);
    return 0;
 }

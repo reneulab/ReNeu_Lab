@@ -1,7 +1,6 @@
 
 #include "myCan.h"
-#include "NiFpga_limb.h"
-#include "NiFpga.h"
+
 
 typedef enum {
 	thumb  = 1,
@@ -34,14 +33,14 @@ typedef struct {
 
 typedef struct {
 	int32_t 	 time;
-	double 		 angle; 
 	finger 		 digit;
 	command		 cmd;
 	NTCAN_HANDLE handle;  
 } arg; 
 
-NTCAN_HANDLE initLimb(finger myDigit, command *myCmd); 
+int32_t findFinger(finger myDigit);
 
+NTCAN_HANDLE initLimb(finger myDigit, command *myCmd); 
 int32_t closeLimb(NTCAN_HANDLE handle, finger myDigit); 
 /***************************************************************/
 /*                Function: writeLimb()								*/
@@ -60,7 +59,23 @@ int32_t writeLimb(NTCAN_HANDLE handle, command *myCmd);
 /***************************************************************/ 
 int32_t readLimb(NTCAN_HANDLE handle, command *myCmd);
 
-int32_t moveLimb(NiFpga_Session session, NiFpga_IndicatorI32 myFlex, arg *myArg);
+ 
+/***************************************************************/
+/*                Function: writeLimb()								*/
+/*			In: 	handle for ntcan device									*/
+/*				 	digit to open												*/
+/*			Out: 	0 if success, 1 if error 								*/
+/***************************************************************/ 
+int32_t openDigit(NTCAN_HANDLE handle, int32_t myDigit[], int32_t spd);
 
-double convertAngle(int32_t myAngle);  
+ 
+/***************************************************************/
+/*                Function: writeLimb()								*/
+/*			In: 	handle for ntcan device									*/
+/*					digit to close												*/
+/*			Out: 	0 if success, 1 if error 								*/
+/***************************************************************/ 
+int32_t closeDigit(NTCAN_HANDLE handle, int32_t myDigit[], int32_t spd);
+
+int32_t moveLimb_T(NTCAN_HANDLE handle, int32_t myDigit, handMode myMode, movement *move); 
 

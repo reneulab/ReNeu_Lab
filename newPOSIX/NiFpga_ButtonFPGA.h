@@ -24,20 +24,21 @@
 /**
  * The signature of the FPGA bitfile.
  */
-static const char* const NiFpga_FPGA_Signature = "1617612A4B001231B03C1535FA655CA7";
+static const char* const NiFpga_FPGA_Signature = "135DCE7EB5A47CEBF864D0AC5952991B";
 
 typedef enum
 {
-   NiFpga_middle = 0x8116,
-   NiFpga_pinkie = 0x810E,
-   NiFpga_index = 0x811A,
-   NiFpga_ring = 0x8112,
-   NiFpga_thumb = 0x811E, // DI0
-} NiFpga_ButtonFPGA_IndicatorBool;
-
-typedef enum
-{
-   NiFpga_stop = 0x8122,
+   NiFpga_stop = 0x8112,
 } NiFpga_ButtonFPGA_ControlBool;
+
+typedef enum
+{
+   NiFpga_input = 0x810E,
+} NiFpga_ButtonFPGA_IndicatorArrayBool;
+
+typedef enum
+{
+   NiFpga_ButtonFPGA_IndicatorArrayBoolSize_input = 5,
+} NiFpga_ButtonFPGA_IndicatorArrayBoolSize;
 
 #endif
