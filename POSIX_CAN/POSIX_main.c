@@ -119,7 +119,11 @@ int32_t main(void)
 /* opens a session, downloads the bitstream, and runs the FPGA */
       	printf("Opening a session...\n");
       	NiFpga_MergeStatus(&status, NiFpga_Open(Bitfile,
+<<<<<<< HEAD
                                               NiFpga_Signature,
+=======
+                                              NiFpga_FPGA_Signature,
+>>>>>>> 7d739bcd59d6fe3dad7861d911109b98965b821b
                                               "rio://146.6.84.41/RIO0",
                                               NiFpga_OpenAttribute_NoRun,
                                               &(myNI.session)));
