@@ -167,26 +167,26 @@ int32_t readLimb(NTCAN_HANDLE handle, command *myCmd)
 		 
 /***************************************************************/
 /***************************************************************/
-int32_t moveLimb(NiFpga_Session session, NiFpga_IndicatorI32 myFlex, arg *myArg)
+int32_t moveLimb(NiFpga_Session session, NiFpga_IndicatorI32 myFlex, movement *myMove)
 {
 	int32_t result;
  	int32_t realAngle;
 
 	do 
 	{	
-		result = writeLimb(myArg->handle,&(myArg->cmd));
+		result = writeLimb(myMove->handle,&(myMove->cmd));
   		if(result != 0)
   			{ return 1; }
 		NiFpga_ReadI32(session,myFlex,&realAngle); 
 		realAngle = convertAngle(realAngle);
-		if(realAngle > myArg->angle)
-			{ myArg->cmd.mode = l_close; }
-		else if(realAngle < myArg->angle)
-			{ myArg->cmd.mode = l_open; }
-	} while(realAngle != myArg->angle); 
+		if(realAngle > myMove->angle)
+			{ myMove->cmd.mode = l_close; }
+		else if(realAngle < myMove->angle)
+			{ myMove->cmd.mode = l_open; }
+	} while(realAngle != myMove->angle); 
 	
-	myArg->cmd.mode = l_stop;
-	writeLimb(myArg->handle,&(myArg->cmd));	
+	myMove->cmd.mode = l_stop;
+	writeLimb(myMove->handle,&(myMove->cmd));	
 	return 0; 
 }
 

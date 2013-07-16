@@ -37,7 +37,7 @@ void* flexThread(void *myNI)
 
 void* niThread(void *myNI)
 {
-   	NiFpga_ReadBool((*(niData*)myNI).session,NiFpga_thumb_switch, &((*(niData*)myNI).DIO[0]));
+  	NiFpga_ReadBool((*(niData*)myNI).session,NiFpga_thumb_switch, &((*(niData*)myNI).DIO[0]));
 	NiFpga_ReadBool((*(niData*)myNI).session,NiFpga_index_switch, &((*(niData*)myNI).DIO[1]));
 	NiFpga_ReadBool((*(niData*)myNI).session,NiFpga_middle_switch,&((*(niData*)myNI).DIO[2]));
 	NiFpga_ReadBool((*(niData*)myNI).session,NiFpga_ring_switch,  &((*(niData*)myNI).DIO[3]));
@@ -46,22 +46,22 @@ void* niThread(void *myNI)
 	pthread_exit(NULL);
 }
 
-void* limbThread(void *arg1) 
+void* limbThread(void *move1) 
 {
   	int32_t		result;
-	arg 		myArg;
+	movement 		myMove;
 	handMode	myCmd;
 
-	myArg = (*((arg *) arg1));
-	myCmd = myArg.cmd.mode; 
+	myMove = (*((movement *) move1));
+	myCmd = myMove.cmd.mode; 
 
-	myArg.cmd.mode = l_stop;
-	result = writeLimb(myArg.handle,&(myArg.cmd));
+	myMove.cmd.mode = l_stop;
+	result = writeLimb(myMove.handle,&(myMove.cmd));
 	usleep(20000);	
 
-	myArg.cmd.mode = myCmd;
-	result = writeLimb(myArg.handle,&(myArg.cmd));
-	usleep(myArg.time);
+	myMove.cmd.mode = myCmd;
+	result = writeLimb(myMove.handle,&(myMove.cmd));
+	usleep(myMove.time);
 
 	pthread_exit(NULL);  
 }
@@ -72,7 +72,7 @@ int32_t main(void)
 	pthread_t*  digit_T[5]; 
 	pthread_t*	flex_T;
 	pthread_t*  switch_T;	
-	arg 	  	myDigit[5]; 
+	movement 	  	myDigit[5]; 
 	int32_t 	ret[5]; 
 	int32_t		ret0;
 	niData 		myNI; 
@@ -119,11 +119,7 @@ int32_t main(void)
 /* opens a session, downloads the bitstream, and runs the FPGA */
       	printf("Opening a session...\n");
       	NiFpga_MergeStatus(&status, NiFpga_Open(Bitfile,
-<<<<<<< HEAD
                                               NiFpga_Signature,
-=======
-                                              NiFpga_FPGA_Signature,
->>>>>>> 7d739bcd59d6fe3dad7861d911109b98965b821b
                                               "rio://146.6.84.41/RIO0",
                                               NiFpga_OpenAttribute_NoRun,
                                               &(myNI.session)));
