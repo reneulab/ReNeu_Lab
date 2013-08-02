@@ -5,6 +5,7 @@
 #include "limb.h"
 #include "myCan.h" 
 #define MESSAGE_LEN 1
+#define ADC_DEGREE 100000
 int32_t thumb_ID[3] = {3,0x101,0x201};
 int32_t index_ID[3] = {3,0x105,0x205};
 int32_t middle_ID[3] = {3,0x103,0x203};
@@ -166,124 +167,39 @@ int32_t readLimb(NTCAN_HANDLE handle, command *myCmd)
 		 
 /***************************************************************/
 /***************************************************************/
-int32_t openDigit(NTCAN_HANDLE handle, int32_t myDigit[], int32_t spd) 
+int32_t moveLimb(NiFpga_Session session, NiFpga_IndicatorI32 myFlex, movement *myMove)
 {
-  command myCmd;
-  int32_t result;
-
-  myCmd.digit_w = myDigit[1];
-  myCmd.digit_r = myDigit[2]; 
-  myCmd.mode = l_open; 
-  myCmd.speed = spd;
-  result = writeLimb(handle, &myCmd);  
-  if(result != 0)
-    { return 1; }
-/* Get feedback until finger is open all the way */
-  do {
-    result = readLimb(handle, &myCmd);
-    if(result != 0)
-      { return 1; }
-	 usleep(20000);
-    } while (myCmd.mode != s_open);
-/* Stop motor on finger */
-  myCmd.mode = l_stop;
-  myCmd.speed = 100; 
-  result = writeLimb(handle, &myCmd);
-  if(result != 0)
-  	{ return 1; }
-  return 0; 
-}
-/**********************************************/	 
-int32_t closeDigit(NTCAN_HANDLE handle, int32_t myDigit[], int32_t spd) 
-{
-  command myCmd;
-  int32_t result;
-
-  myCmd.digit_w = myDigit[1];
-  myCmd.digit_r = myDigit[2];
-  myCmd.mode = l_close; 
-  myCmd.speed = spd;
-  result = writeLimb(handle, &myCmd);  
-  if(result != 0)
-    { return 1; }
-/* Get feedback until finger is open all the way */
-  do {
-    result = readLimb(handle, &myCmd);
-    if(result != 0)
-      { return 1; }
-	 usleep(20000); 	
-  } while (myCmd.mode != s_close);
-/* Stop motor on finger */
-  myCmd.mode = l_stop;
-  myCmd.speed = 100; 
-  result = writeLimb(handle, &myCmd);
-  if(result != 0)
-    { return 1; }
-  return 0; 
-}
-
-int32_t moveLimb_T(NTCAN_HANDLE handle, int32_t myDigit, handMode myMode, movement *move)
-{
- /*	command myCmd;
 	int32_t result;
+ 	int32_t realAngle;
 
-	if((myMode==s_open) || (myMode==s_close)) {
-		printf("Error invaild mode"); 
-		return 1;
-	}
+	do 
+	{	
+		result = writeLimb(myMove->handle,&(myMove->cmd));
+  		if(result != 0)
+  			{ return 1; }
+		NiFpga_ReadI32(session,myFlex,&realAngle); 
+		realAngle = convertAngle(realAngle);
+		if(realAngle > myMove->angle)
+			{ myMove->cmd.mode = l_close; }
+		else if(realAngle < myMove->angle)
+			{ myMove->cmd.mode = l_open; }
+	} while(realAngle != myMove->angle); 
 	
-	if(move->angle == NULL) 
-	{
-// move based on time and speed
-		myCmd.digit_w = myDigit[1];
-		myCmd.digit_r = myDigit[2];
-		myCmd.mode = myMode;
-		myCmd.speed = move->vel;
-		if(myCmd.speed == NULL)
-			{ myCmd.speed = 400; }
-		result = writeLimb(handle, &myCmd);
-		if(result != 0) 
-		{ 
-			myCmd.mode = l_stop;
-			writeLimb(handle, &myCmd);
-		 	return 1; 
-		}
-		usleep(move->time);
-		myCmd.mode = l_stop;
-		result = writeLimb(handle, &myCmd);  
-		if(result != 0) 
-			{ return 1; }
-		return 0;
-	}
-	else if( move->time == NULL)
-	{
-// move a distance
-		myCmd.digit_w = myDigit[1];
-		myCmd.digit_r = myDigit[2];
-		myCmd.mode = myMode;
-		myCmd.speed = move->vel;
-		if(myCmd.speed == NULL)
-			{ myCmd.speed = 400; }
-		
-	}
-
-
-	myCmd.digit_w = myDigit[1];
-	myCmd.digit_r = myDigit[2];
-	myCmd.mode = myMode; 
-	myCmd.speed = move->vel;
-	result = writeLimb(handle, &myCmd);
-	if(result != 0) { 
-		myCmd.mode = l_stop;
-		writeLimb(handle, &myCmd);
-		 return 1; 
-	}
-	usleep(move->time);
-	myCmd.mode = l_stop;
-	result = writeLimb(handle, &myCmd);  
-	if(result != 0) 
-		{ return 1; }
-	return 0; */
+	myMove->cmd.mode = l_stop;
+	writeLimb(myMove->handle,&(myMove->cmd));	
+	return 0; 
 }
-	
+
+/***************************************************************/
+/***************************************************************/
+double convertAngle(int32_t myAngle)
+{
+	double newAngle; 
+
+	newAngle = myAngle/ADC_DEGREE; 	// ADC_DEGREE needs to be tested out 
+	return newAngle; 
+}
+/* end of fuctions */
+
+
 

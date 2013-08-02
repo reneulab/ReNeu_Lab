@@ -321,6 +321,6 @@ int32_t writeNTCAN(NTCAN_HANDLE handle, int32_t len, CMSG *msg)
    result = canWrite(handle, msg, &len, NULL); 
    if(errorCheck(CAN_WRITE,result) != 0)
       { return 1; }
-   printf("Message sent %d successful frames\n",len);
+//   printf("Message sent %d successful frames\n",len);
    return 0;
 }
