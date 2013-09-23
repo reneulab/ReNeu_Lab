@@ -8,7 +8,7 @@ CAN_OBJ=canerror.o ntcan.o
 all: $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJ) 
-	$(CC) -pthread -ggdb -o POSIX_main $(OBJ) -ldl 
+	$(CC) -pthread -ldl -ggdb -o POSIX_main $(OBJ)
 
 POSIX_main.o: $(LDFLAGS) limb.o POSIX_main.c 
 
